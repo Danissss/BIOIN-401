@@ -5,18 +5,19 @@ import sqlite3
 # "find" will find the text inside the tag that "find" is look for
 
 
-xmlFile = "testData_drugbank.xml"
+xmlFile = "full database.xml"
 storeFile = "store_file.txt"
 tree = ET.parse(xmlFile)
 root = tree.getroot()
 ns = '{http://www.drugbank.ca}'
 
-databaseFile = "drugbank_test.db"
+databaseFile = "drugbank.db"
 conn = sqlite3.connect(databaseFile)
 cursor = conn.cursor()
 
-cursor.execute("drop table drugbank_drug;")
-cursor.execute("drop table drugbank_transport;")
+cursor.execute("drop table if exists drugbank_drug;")
+cursor.execute("drop table if exists drugbank_transport;")
+cursor.execute("drop view  if exists combine_;")
 cursor.execute("create table drugbank_drug (drug_id char(20), drug_type char(20), drug_name char(20),\
                drug_state char(20), drug_group char(20), drug_smiles char(20), drug_InChIKey char(30), primary key (drug_id));")
 cursor.execute("create table drugbank_transport (drug_id char(20), drug_transport_id char(20), drug_transport_name char(20),\
@@ -39,7 +40,10 @@ for child in root.findall(ns+"drug"):
     drug_type = child.get("type")
     drug_ID = child.find(ns+"drugbank-id").text
     drug_name = child.find(ns+"name").text
-    drug_state = child.find(ns+"state").text
+    
+    drug_state = None
+    if child.find(ns+"state") is not None:
+        drug_state = child.find(ns+"state").text
     
     #get drug group
     drug_group2 = None
@@ -51,7 +55,7 @@ for child in root.findall(ns+"drug"):
             else:
                 drug_group2 = "unapproved"
     else:
-        drug_group2 = "NULL"
+        drug_group2 = None
 
     #get the properties of smiles and InChIkey
     drug_smiles = None
@@ -67,9 +71,9 @@ for child in root.findall(ns+"drug"):
                 #print(drug_smiles)
                 if single_property.find(ns+"kind") is not None and single_property.find(ns+"kind").text == "InChIKey":
                     drug_InChIKey = single_property.find(ns+"value").text
-else:
-    drug_smiles = "NULL"
-        drug_InChIKey = "NULL"
+    else:
+        drug_smiles = None
+        drug_InChIKey = None
 
     #print(drug_ID, drug_type, drug_name, drug_state,drug_group2,drug_smiles, drug_InChIKey)
     temp_tuple = (drug_ID,drug_type,drug_name,drug_state,drug_group2,drug_smiles,drug_InChIKey)
@@ -96,6 +100,7 @@ else:
 #cursor.execute("insert into drugbank_transport values (" + drug_ID + "," + transport_id + "," + trasnport_name + ");")
 
 # get combined dataset
-cursor.execute("select * from drugbank_drug drug left outer join drugbank_transport transport on drug.drug_id = transport.drug_id;")
+cursor.execute("create view combine_  as select drug.drug_id, drug.drug_type,drug.drug_name,drug.drug_state,drug.drug_group,transport.drug_transport_id,transport.drug_transport_name from drugbank_drug drug left outer join drugbank_transport transport on drug.drug_id = transport.drug_id;")
+
 conn.commit()
 conn.close()
