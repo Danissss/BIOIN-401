@@ -1,7 +1,15 @@
  
 
 
-fileName = "test_uniprot_data.dat"
+# database stuff
+import sqlite3
+conn = sqlite3.connect("uniprotDB.db")
+c = conn.cursor()
+c.execute("drop table if exists uniprot_database;")
+c.execute("create table uniprot_database (uniprot_ID char(20), full_name char(20), ID char(20),gene_ID char(20),\
+            organism char(20), transport boolean);")
+
+fileName = "uniprot_sprot.dat"
 f = open(fileName,"r")
 files = f.readlines()
 files_length = len(files)
@@ -22,7 +30,7 @@ for index in range(start_index,files_length):
         ID = None
         GeneID = None
         Organism = None
-        transport = False
+        transport = 0
 
 
         determine = []
@@ -33,9 +41,8 @@ for index in range(start_index,files_length):
             if "DR   GO;" in real_i:
                 determine.append(real_i)
             for is_transport in determine:
-                if "transport" in is_transport:
-                    transport = True
-            print(determine)
+                if "transporter" in is_transport:
+                    transport = 1
             determine.clear()
             
             
@@ -62,7 +69,9 @@ for index in range(start_index,files_length):
             if "AC   " in real_i:
                 UniprotID_split = real_i.split(";")
                 UniprotID = UniprotID_split[0].replace("AC   ","")
-        print(GeneID, ID, Organism,FullName,UniprotID,transport )        
+        # print(GeneID, ID, Organism,FullName,UniprotID,transport )   
+        temp_tuple = (UniprotID,FullName,ID,GeneID,Organism,transport)
+        c.execute("insert into uniprot_database values(?,?,?,?,?,?)",temp_tuple)   
 
         
         #reset the block
@@ -71,6 +80,7 @@ for index in range(start_index,files_length):
 
         
 
-
+conn.commit()
+conn.close()
 
 f.close()
