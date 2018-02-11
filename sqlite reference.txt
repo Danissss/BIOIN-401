@@ -1,0 +1,43 @@
+how to use the SQLite ALTER TABLE statement to add a column, modify a column, drop a column, rename a column or rename a table?
+
+Add column in table:
+Syntax:
+	ALTER TABLE table_name ADD new_column_name column_definition;
+Example:
+	ALTER TABLE employees ADD status VARCHAR;
+
+Modify column in table: 
+You can not use the ALTER TABLE statement to modify a column in SQLite. 
+Instead you will need to rename the table, create a new table, and copy the data into the new table.
+
+Syntax:
+
+
+PRAGMA foreign_keys=off;
+
+BEGIN TRANSACTION;
+
+ALTER TABLE employees RENAME TO _employees_old;
+
+CREATE TABLE employees
+( employee_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  last_name VARCHAR NOT NULL,
+  first_name VARCHAR
+);
+
+INSERT INTO employees (employee_id, last_name, first_name)
+  SELECT employee_id, last_name, first_name
+  FROM _employees_old;
+
+COMMIT;
+
+PRAGMA foreign_keys=on;
+
+
+You can not use the ALTER TABLE statement to rename a column in SQLite. 
+Instead you will need to rename the table, create a new table, and copy the data into the new table.
+
+
+Rename table:
+Syntax:
+	ALTER TABLE table_name RENAME TO new_table_name;
