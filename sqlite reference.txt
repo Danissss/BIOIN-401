@@ -41,3 +41,15 @@ Instead you will need to rename the table, create a new table, and copy the data
 Rename table:
 Syntax:
 	ALTER TABLE table_name RENAME TO new_table_name;
+
+
+create an temporary Table:
+CREATE TEMPORARY TABLE ParentChild AS
+WITH FT_CTE AS (
+    SELECT pID, cID FROM brFTNode_Children 
+    WHERE pID = 1
+    UNION ALL
+    SELECT e.pID, e.cID FROM brFTNode_Children e
+    INNER JOIN FT_CTE ftCTE ON (ftCTE.cID = e.pID)
+)
+SELECT * FROM FT_CTE;

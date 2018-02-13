@@ -11,17 +11,21 @@ tree = ET.parse(xmlFile)
 root = tree.getroot()
 ns = '{http://www.drugbank.ca}'
 
-databaseFile = "drugbank.db"
+databaseFile = "test_drugbank.db"
 conn = sqlite3.connect(databaseFile)
 cursor = conn.cursor()
 
 cursor.execute("drop table if exists drugbank_drug;")
 cursor.execute("drop table if exists drugbank_transport;")
+cursor.execute("drop table if exists drugbank_carrier")
 cursor.execute("drop view  if exists combine_;")
+cursor.execute("drop view  if exists transporter_carrier;")
 cursor.execute("create table drugbank_drug (drug_id char(20), drug_type char(20), drug_name char(20),\
                drug_state char(20), drug_group char(20), drug_smiles char(20), drug_InChIKey char(30), primary key (drug_id));")
 cursor.execute("create table drugbank_transport (drug_id char(20), drug_transport_id char(20), drug_transport_name char(20),\
-               foreign key (drug_id) references drugbank_drug(drug_id));")
+               target_type char(20), foreign key (drug_id) references drugbank_drug(drug_id));")
+cursor.execute("create table drugbank_carrier (drug_id char(20), drug_carrier_id char(20), drug_carrier_name \
+                char(20), target_type char(20), foreign key (drug_id) references drugbank_drug(drug_id));")
 
 
 
@@ -78,6 +82,7 @@ for child in root.findall(ns+"drug"):
     #print(drug_ID, drug_type, drug_name, drug_state,drug_group2,drug_smiles, drug_InChIKey)
     temp_tuple = (drug_ID,drug_type,drug_name,drug_state,drug_group2,drug_smiles,drug_InChIKey)
     cursor.execute("insert into drugbank_drug values (?,?,?,?,?,?,?)",temp_tuple)
+
     for transport in child.findall(ns+"transporters"):
         #transportNum = transport.get("position").text
         
@@ -85,9 +90,19 @@ for child in root.findall(ns+"drug"):
             transport_id = i.find(ns+"id").text
             transport_name = i.find(ns+"name").text
             #print(drug_ID,transport_id,transport_name)
-            temp_tuple = (drug_ID, transport_id,transport_name)
+            temp_tuple = (drug_ID, transport_id,transport_name, "transporter")
                 
-            cursor.execute("insert into drugbank_transport values (?,?,?)",temp_tuple)
+            cursor.execute("insert into drugbank_transport values (?,?,?,?)",temp_tuple)
+    for carriers in child.findall(ns+"carriers"):
+        for i in carriers.findall(ns+"carrier"):
+            carrier_id = i.find(ns+"id").text
+            carrier_name = i.find(ns+"name").text
+            
+            temp_tuple = (drug_ID, carrier_id, carrier_name, "carrier")
+
+            cursor.execute("insert into drugbank_carrier values (?,?,?,?)", temp_tuple)
+
+
 # if transport.find(ns+"id") is None or transport.find(ns+"name") is None:
 #     transport_id = "NULL"
 #     transport_name = "NULL"
@@ -100,7 +115,11 @@ for child in root.findall(ns+"drug"):
 #cursor.execute("insert into drugbank_transport values (" + drug_ID + "," + transport_id + "," + trasnport_name + ");")
 
 # get combined dataset
-cursor.execute("create view combine_  as select drug.drug_id, drug.drug_type,drug.drug_name,drug.drug_state,drug.drug_group,transport.drug_transport_id,transport.drug_transport_name from drugbank_drug drug left outer join drugbank_transport transport on drug.drug_id = transport.drug_id;")
-
+cursor.execute("create view combine_  as select drug.drug_id, drug.drug_type,drug.drug_name,drug.drug_state,drug.drug_group,\
+                transport.drug_transport_id,transport.drug_transport_name from drugbank_drug drug \
+                left outer join drugbank_transport transport on drug.drug_id = transport.drug_id;")
+cursor.execute("create view transporter_carrier as select drug_id as drug_id, drug_carrier_id as drug_target_id, \
+                drug_carrier_name as drug_target_name, target_type as target_type \
+                from drugbank_carrier union select * from drugbank_transport;")
 conn.commit()
 conn.close()
