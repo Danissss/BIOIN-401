@@ -83,11 +83,10 @@ for child in root.findall(ns+"drug"):
     temp_tuple = (drug_ID,drug_type,drug_name,drug_state,drug_group2,drug_smiles,drug_InChIKey)
     cursor.execute("insert into drugbank_drug values (?,?,?,?,?,?,?)",temp_tuple)
 
-<<<<<<< HEAD
+
     trasnport_id = None
     transport_name = None
-=======
->>>>>>> 5661ce6cd548ca7a5dc2a744d6acbf295eb0e585
+
     for transport in child.findall(ns+"transporters"):
         #transportNum = transport.get("position").text
         
@@ -97,7 +96,7 @@ for child in root.findall(ns+"drug"):
             #print(drug_ID,transport_id,transport_name)
             temp_tuple = (drug_ID, transport_id,transport_name, "transporter")
                 
-<<<<<<< HEAD
+
             cursor.execute("insert into drugbank_transport values (?,?,?)",temp_tuple)
 
     # UniprotKB_ID = None
@@ -109,8 +108,8 @@ for child in root.findall(ns+"drug"):
     #             UniprotKB_ID = i.find(ns+"identifier").text
 
     # print(drug_ID,transport_id,UniprotKB_ID, transport_name )
-=======
-            cursor.execute("insert into drugbank_transport values (?,?,?,?)",temp_tuple)
+
+            # cursor.execute("insert into drugbank_transport values (?,?,?,?)",temp_tuple)
     for carriers in child.findall(ns+"carriers"):
         for i in carriers.findall(ns+"carrier"):
             carrier_id = i.find(ns+"id").text
@@ -121,7 +120,7 @@ for child in root.findall(ns+"drug"):
             cursor.execute("insert into drugbank_carrier values (?,?,?,?)", temp_tuple)
 
 
->>>>>>> 5661ce6cd548ca7a5dc2a744d6acbf295eb0e585
+
 # if transport.find(ns+"id") is None or transport.find(ns+"name") is None:
 #     transport_id = "NULL"
 #     transport_name = "NULL"
