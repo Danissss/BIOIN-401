@@ -23,7 +23,7 @@ cursor.execute("drop view  if exists transporter_carrier;")
 cursor.execute("create table drugbank_drug (drug_id char(20), drug_type char(20), drug_name char(20),\
                drug_state char(20), drug_group char(20), drug_smiles char(20), drug_InChIKey char(30), primary key (drug_id));")
 cursor.execute("create table drugbank_transport (drug_id char(20), drug_transport_id char(20), drug_transport_name char(20),\
-               target_type char(20), foreign key (drug_id) references drugbank_drug(drug_id));")
+               actions char(20), foreign key (drug_id) references drugbank_drug(drug_id));")
 cursor.execute("create table drugbank_carrier (drug_id char(20), drug_carrier_id char(20), drug_carrier_name \
                 char(20), target_type char(20), foreign key (drug_id) references drugbank_drug(drug_id));")
 
@@ -94,10 +94,16 @@ for child in root.findall(ns+"drug"):
             transport_id = i.find(ns+"id").text
             transport_name = i.find(ns+"name").text
             #print(drug_ID,transport_id,transport_name)
-            temp_tuple = (drug_ID, transport_id,transport_name, "transporter")
+            transport_actions = ""
+            for j in i.findall(ns+"actions"):
+                for k in j.findall(ns+"action"):
+                    transport_actions += "|"+str(k.text)
+            transport_actions += "|"
+
+            temp_tuple = (drug_ID, transport_id,transport_name, transport_actions)
                 
 
-            cursor.execute("insert into drugbank_transport values (?,?,?)",temp_tuple)
+            cursor.execute("insert into drugbank_transport values (?,?,?,?)",temp_tuple)
 
     # UniprotKB_ID = None
     # for external_identifiers in child.findall(ns+"external-identifiers"):
@@ -110,34 +116,21 @@ for child in root.findall(ns+"drug"):
     # print(drug_ID,transport_id,UniprotKB_ID, transport_name )
 
             # cursor.execute("insert into drugbank_transport values (?,?,?,?)",temp_tuple)
-    for carriers in child.findall(ns+"carriers"):
-        for i in carriers.findall(ns+"carrier"):
-            carrier_id = i.find(ns+"id").text
-            carrier_name = i.find(ns+"name").text
+    # for carriers in child.findall(ns+"carriers"):
+    #     for i in carriers.findall(ns+"carrier"):
+    #         carrier_id = i.find(ns+"id").text
+    #         carrier_name = i.find(ns+"name").text
             
-            temp_tuple = (drug_ID, carrier_id, carrier_name, "carrier")
+    #         temp_tuple = (drug_ID, carrier_id, carrier_name, "carrier")
 
-            cursor.execute("insert into drugbank_carrier values (?,?,?,?)", temp_tuple)
-
-
-
-# if transport.find(ns+"id") is None or transport.find(ns+"name") is None:
-#     transport_id = "NULL"
-#     transport_name = "NULL"
-#     print(drug_ID,transport_id,transport_name)
-# else:
-#     for i in transport.findall(ns+"transporter"):
-#         transport_id = i.find(ns+"id").text
-#         transport_name = i.find(ns+"name").text
-#         print(drug_ID,transport_id,transport_name)
-#cursor.execute("insert into drugbank_transport values (" + drug_ID + "," + transport_id + "," + trasnport_name + ");")
+    #         cursor.execute("insert into drugbank_carrier values (?,?,?,?)", temp_tuple)
 
 # get combined dataset
 cursor.execute("create view combine_  as select drug.drug_id, drug.drug_type,drug.drug_name,drug.drug_state,drug.drug_group,\
                 transport.drug_transport_id,transport.drug_transport_name from drugbank_drug drug \
                 left outer join drugbank_transport transport on drug.drug_id = transport.drug_id;")
-cursor.execute("create view transporter_carrier as select drug_id as drug_id, drug_carrier_id as drug_target_id, \
-                drug_carrier_name as drug_target_name, target_type as target_type \
-                from drugbank_carrier union select * from drugbank_transport;")
+# cursor.execute("create view transporter_carrier as select drug_id as drug_id, drug_carrier_id as drug_target_id, \
+#                 drug_carrier_name as drug_target_name, target_type as target_type \
+#                 from drugbank_carrier union select * from drugbank_transport;")
 conn.commit()
 conn.close()
