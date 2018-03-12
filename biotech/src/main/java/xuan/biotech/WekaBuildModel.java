@@ -71,6 +71,25 @@ public class WekaBuildModel {
 		
 	}
 	
+	/*
+	 * @input: the file path of training data set
+	 *              
+	 * @note: build all classifier models
+	 */
+	public static void Training_model(String input_file_path) throws Exception{
+		BufferedReader buffer_reader = null;
+		buffer_reader = new BufferedReader(new FileReader(input_file_path));
+		Instances training = new Instances(buffer_reader);
+		training.setClassIndex(training.numAttributes() -1); //training.numAttributes() -1: this 1 is the attribute
+															//that we are going to predict
+		buffer_reader.close();
+		
+		
+		
+		
+		
+	}
+	
 	
 	
 	/*
@@ -116,7 +135,7 @@ public class WekaBuildModel {
 				}
 				
 				
-			}else {
+			}else if (fileType.equals("csv")) {
 				
 				String path_to_arff = args[1];
 				
@@ -142,7 +161,19 @@ public class WekaBuildModel {
 					
 				}
 				
+			}else if (fileType.equals("arff")) {
+				
+				Training_model(args[1]);
+				
+				
+				
+				
+			}else {
+				System.out.println("wrong input (see readme");
+				System.exit(0);
 			}
+			
+			
 		}
 		
 	}
