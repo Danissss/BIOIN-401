@@ -26,6 +26,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import com.opencsv.CSVReader;
@@ -39,6 +40,7 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
+import org.apache.commons.lang3.ArrayUtils;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.exception.CDKException;
@@ -49,14 +51,93 @@ import org.openscience.cdk.exception.CDKException;
 
 public class GeneratingFeatures
 {
-	/*
-	 * read_csv
-	 * @function: parse the csv file into java object
-	 * @input:  path to csv_file in string
-	 * @output: java object
-	 * @notes: nextLine[n]; n might be change due to the table
+	
+	
+	
+	
+	
+	
+	/**
+	 * take single smile string to get the arff file for weka prediction.
+	 * @param: smiles_String
+	 * @return: the file_path that contain the value for predicting on the model (class)
 	 */
-	public static String generating_feature(String csv_file_path) throws Exception
+	 
+	 public static String generating_feature(String smileString) throws Exception{
+		 
+		 String smiles = smileString;
+		 String output_path = "/Users/xuan/Desktop/output.csv";
+		 CSVWriter writer = new CSVWriter(new FileWriter(output_path));
+		 
+		 String tempFile = "/Users/xuan/Desktop/testcsv.sdf";
+		 SDFWriter sdw  = new SDFWriter(new FileWriter(tempFile));
+		 
+		 SmilesParser temp_smiles = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+		 IAtomContainer atom_container   = temp_smiles.parseSmiles(smiles);
+		 StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+		 sdg.setMolecule(atom_container);
+		 sdg.generateCoordinates();
+		 IAtomContainer mole = sdg.getMolecule();
+		 HashMap<Object,Object> properties = new HashMap<Object,Object>();
+		 properties.put("SMILES", smiles);
+		 mole.addProperties(properties);
+	
+	     sdw.write(mole);
+	     sdw.close();
+		 
+	     
+	     FeatureGeneration featureGeneration = new FeatureGeneration();
+			// featureGeneration.readFile(tempFile) will read the sdf file (with all sdf molecule
+			// then pass them to IAtomContainerSet moleSet
+	     IAtomContainerSet moleSet = featureGeneration.readFile(tempFile);
+	     
+	     CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mole.getBuilder());
+ 	 	 System.out.println(mole.getProperties());
+		 String molecularFeatures = featureGeneration.generateMolecularFeatures(mole);
+		 String[] molecularFeature = molecularFeatures.split(",");
+		 for(int i = 0 ; i < moleSet.getAtomContainerCount(); i++) {
+				
+				IAtomContainer molecule = moleSet.getAtomContainer(i);
+				
+		    	 	CDKHydrogenAdder adders = CDKHydrogenAdder.getInstance(molecule.getBuilder());
+		    	 	System.out.println(molecule.getProperties());
+				String molecularFeatures_single = featureGeneration.generateMolecularFeatures(molecule);
+				String[] molecularFeature_single = molecularFeatures_single.split(",");
+				
+				
+				String[] questionMark = new String[1];
+				questionMark[0] = "?";
+				molecularFeature = ArrayUtils.addAll(molecularFeature,questionMark);
+				
+				//System.out.println(Arrays.toString(combinedFeature)); //works
+				
+				writer.writeNext(molecularFeature);
+				
+			}
+			
+			
+			File checkFile = new File(tempFile);
+			if(checkFile.exists()) {
+				checkFile.delete();
+				System.out.println("Temp File deleted");
+			}
+			writer.close();
+		 
+		 return "ok";
+		 
+	 }
+	 
+	/**
+	 * read_csv
+	 * function: parse the csv file into java object
+	 * notes: nextLine[n]; n might be change due to the table
+	 * if it is predicting setting, it will add "?" at the end of string 
+	 * @param:  path to csv_file in string
+	 * @param:  isPredicting
+	 * @return: java object
+	 * 
+	 */
+	public static String generating_feature(String csv_file_path, boolean isPredicting) throws Exception
 	{
 		
 		CSVReader reader = new CSVReader(new FileReader(csv_file_path));
@@ -67,8 +148,11 @@ public class GeneratingFeatures
 	 	String tempFile = "/Users/xuan/Desktop/testcsv.sdf";
 	 	SDFWriter sdw  = new SDFWriter(new FileWriter(tempFile));
 	     String [] nextLine;
+	     
+	     //this loop will read all smile string, and convert it to sdf format of molecule
+	     //then, write it back to sdf file SDFWriter sdw
 	     while ((nextLine = reader.readNext()) != null) {    
-	    	    String smile_string = nextLine[4];    //contain smile string
+	    	    String smile_string = nextLine[0];    //contain smile string
 	    	    
 	    	    
 	    	    
@@ -77,24 +161,65 @@ public class GeneratingFeatures
 	 		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
 	 		sdg.setMolecule(atom_container);
 	 		sdg.generateCoordinates();
-	 		IAtomContainer mole = sdg.getMolecule();   
+	 		IAtomContainer mole = sdg.getMolecule();
+	 		HashMap<Object,Object> properties = new HashMap<Object,Object>();
+	 		properties.put("SMILES", smile_string);
+	 		mole.addProperties(properties);
 	
 	        sdw.write(mole);
+	        
+	        
+	        
 	     }
 	     sdw.close();
 
 		FeatureGeneration featureGeneration = new FeatureGeneration();
+		// featureGeneration.readFile(tempFile) will read the sdf file (with all sdf molecule
+		// then pass them to IAtomContainerSet moleSet
 		IAtomContainerSet moleSet = featureGeneration.readFile(tempFile);
 		for(int i = 0 ; i < moleSet.getAtomContainerCount(); i++) {
 			
 			IAtomContainer mole = moleSet.getAtomContainer(i);
+			
 	    	 	CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mole.getBuilder());
-			String testString = featureGeneration.generateMolecularFeatures(mole);
-			String[] ary = testString.split(",");
-			writer.writeNext(ary);
-	    	 			
-	    	 	
+	    	 	System.out.println(mole.getProperties());
+			String molecularFeatures = featureGeneration.generateMolecularFeatures(mole);
+			String[] molecularFeature = molecularFeatures.split(",");
+			
+//			String[] atomicFeatures = featureGeneration.generateAtomicFeatures(mole);
+//			System.out.println(Arrays.toString(atomicFeatures));
+			
+//			String[] combinedFeature;
+//			
+//			String combinedAtomicFeature = atomicFeatures[0];
+//			
+//			for (int lenAtomicFea = 1; lenAtomicFea < atomicFeatures.length; lenAtomicFea++) {
+//				
+//				String eachFeature = atomicFeatures[lenAtomicFea];
+//				combinedAtomicFeature = combinedAtomicFeature +","+ eachFeature ;
+//				
+//				
+//			}
+//			combinedAtomicFeature += "\n";
+//			String[] combinedAtomicFeatures = combinedAtomicFeature.split(",");
+			
+			
+//			combinedFeature = ArrayUtils.addAll(molecularFeature,combinedAtomicFeatures);
+			//System.out.println(Arrays.toString(combinedFeature));
+			
+			// if it is predicting setting, add "?" question mark at the end for weka
+			if (isPredicting == true) {
+				String[] questionMark = new String[1];
+				questionMark[0] = "?";
+				molecularFeature = ArrayUtils.addAll(molecularFeature,questionMark);
+			}
+			//System.out.println(Arrays.toString(combinedFeature)); //works
+			
+			writer.writeNext(molecularFeature);
+			
 		}
+		
+		
 		File checkFile = new File(tempFile);
 		if(checkFile.exists()) {
 			checkFile.delete();
@@ -106,14 +231,20 @@ public class GeneratingFeatures
 		return output_path;
 	}
 	    	 		
-
-	     
 	
+	     
+	/*
+	 * main is just for single java class testing
+	 * other program will call the method of this class directly
+	 */
 	
     public static void main( String[] args ) throws Exception
     {
     	
     		/* detect the length of file*/
+    		boolean isPredict = false;
+    		
+    		
     		int args_length = args.length;
     		if(args_length < 1) {
     			System.out.println("You need input the path to the file");
@@ -126,7 +257,7 @@ public class GeneratingFeatures
     		
     		
     		String path_input_file = args[0];  //return the path of the file
-    		String output_path = generating_feature(path_input_file);
+    		String output_path = generating_feature(path_input_file,isPredict);
     		
     		
     		

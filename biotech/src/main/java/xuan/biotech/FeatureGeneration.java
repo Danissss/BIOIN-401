@@ -61,23 +61,50 @@ import org.openscience.cdk.qsar.descriptors.molecular.APolDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.AcidicGroupCountDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.AromaticAtomsCountDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.AromaticBondsCountDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.AtomCountDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.AutocorrelationDescriptorCharge;
 import org.openscience.cdk.qsar.descriptors.molecular.AutocorrelationDescriptorMass;
+import org.openscience.cdk.qsar.descriptors.molecular.AutocorrelationDescriptorPolarizability;
 import org.openscience.cdk.qsar.descriptors.molecular.BCUTDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.BPolDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.BasicGroupCountDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.BondCountDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.CPSADescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.CarbonTypesDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.ChiChainDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.ChiClusterDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.ChiPathClusterDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.ChiPathDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.EccentricConnectivityIndexDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.FMFDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.FragmentComplexityDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.GravitationalIndexDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.HBondAcceptorCountDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.HBondDonorCountDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.HybridizationRatioDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.IPMolecularLearningDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.KappaShapeIndicesDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.KierHallSmartsDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.LargestChainDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.LargestPiSystemDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.LengthOverBreadthDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.LongestAliphaticChainDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.MDEDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.MannholdLogPDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.MomentOfInertiaDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.PetitjeanNumberDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.PetitjeanShapeIndexDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.RotatableBondsCountDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.RuleOfFiveDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.TPSADescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.VABCDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.VAdjMaDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.WHIMDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.WeightDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.WeightedPathDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.WienerNumbersDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.XLogPDescriptor;
+import org.openscience.cdk.qsar.descriptors.molecular.ZagrebIndexDescriptor;
 import org.openscience.cdk.qsar.result.IDescriptorResult;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
@@ -180,7 +207,7 @@ public class FeatureGeneration {
 	public String generateMolecularFeatures(IAtomContainer molecule) throws CDKException {
 		IAtomContainer mol = molecule;
 		String molecular;
-		String []res=new String[9];
+		String []res=new String[100];
 		ALOGPDescriptor Alogp = new ALOGPDescriptor();
 		res[0] =  Alogp.calculate(mol).getValue().toString().split(",")[0];
 		APolDescriptor Apol = new APolDescriptor();
@@ -190,6 +217,7 @@ public class FeatureGeneration {
 		HBondDonorCountDescriptor HB = new HBondDonorCountDescriptor();
 		res[3] = HB.calculate(mol).getValue().toString();
 		MomentOfInertiaDescriptor Mo = new MomentOfInertiaDescriptor();
+		//System.out.println("mole: " + mol.getProperties());
 		res[4] = Mo.calculate(mol).getValue().toString().split(",")[6];
 		RotatableBondsCountDescriptor Ro = new RotatableBondsCountDescriptor();
 		res[5] = Ro.calculate(mol).getValue().toString();
@@ -199,6 +227,172 @@ public class FeatureGeneration {
 		res[7]= We.calculate(mol).getValue().toString();
 		XLogPDescriptor Xl = new XLogPDescriptor();
 		res[8]= Xl.calculate(mol).getValue().toString();
+		
+		// below is what I add for more features
+//		AcidicGroupCountDescriptor AcidicGroupCountDescriptor = new AcidicGroupCountDescriptor();
+//		res[9] = AcidicGroupCountDescriptor.calculate(mol).toString();
+		AromaticAtomsCountDescriptor aromaticAtomsCountDescriptor = new AromaticAtomsCountDescriptor();
+		res[9] = aromaticAtomsCountDescriptor.calculate(mol).getValue().toString();
+		AromaticBondsCountDescriptor aromaticBondsCountDescriptor = new AromaticBondsCountDescriptor();
+		res[10] = aromaticBondsCountDescriptor.calculate(mol).getValue().toString();
+		AtomCountDescriptor atomCountDescriptor = new  AtomCountDescriptor();
+		res[11] = atomCountDescriptor.calculate(mol).getValue().toString();
+		AutocorrelationDescriptorCharge autocorrelationDescriptorCharge = new AutocorrelationDescriptorCharge();
+		res[12] = autocorrelationDescriptorCharge.calculate(mol).getValue().toString();
+		
+		AutocorrelationDescriptorMass autocorrelationDescriptorMass = new AutocorrelationDescriptorMass();
+		//0.3590444300753892,-0.10431192464149516,-0.1550834960657011,0.07987320566950165,0.0
+		res[13] = autocorrelationDescriptorMass.calculate(mol).getValue().toString();
+		//8.323407106622838,5.996275931397696,8.102836944071207,6.2131220253470225,0.0
+		AutocorrelationDescriptorPolarizability autocorrelationDescriptorPolarizability = new AutocorrelationDescriptorPolarizability();
+		res[14] = autocorrelationDescriptorPolarizability.calculate(mol).getValue().toString();
+		//121.29707693750001,113.41475918750001,116.00826684375001,62.93745600000001,0.0
+		
+//		BasicGroupCountDescriptor basicGroupCountDescriptor = new BasicGroupCountDescriptor();
+//		res[15] = basicGroupCountDescriptor.calculate(mol).getValue().toString();
+		
+		BCUTDescriptor bcutDescriptor = new BCUTDescriptor();
+		res[16] = bcutDescriptor.calculate(mol).getValue().toString();
+		//11.988843662207877,16.00614015503661,-0.3258094297439691,0.39409562267172815,3.461497246633728,5.527256428365751
+		
+		BondCountDescriptor bondCountDescriptor = new BondCountDescriptor();
+		res[17] = bondCountDescriptor.calculate(mol).getValue().toString();
+		//5
+		
+		BPolDescriptor bPolDescriptor = new BPolDescriptor();
+		res[18] = bPolDescriptor.calculate(mol).getValue().toString();
+		//6.288828
+		
+		CarbonTypesDescriptor carbonTypesDescriptor = new CarbonTypesDescriptor();
+		res[19] = carbonTypesDescriptor.calculate(mol).getValue().toString();
+		//0,0,1,1,0,1,0,0,0
+		
+		ChiChainDescriptor chiChainDescriptor = new ChiChainDescriptor();
+		res[20] = chiChainDescriptor.calculate(mol).getValue().toString();
+		//0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+		
+		ChiClusterDescriptor chiClusterDescriptor = new ChiClusterDescriptor();
+		res[21] = chiClusterDescriptor.calculate(mol).getValue().toString();
+		//0.6666666666666666,0.0,0.3333333333333333,0.0,0.14770561907472962,0.0,0.018633899812498248,0.0
+		
+		ChiPathClusterDescriptor chiPathClusterDescriptor = new ChiPathClusterDescriptor();
+		res[22] = chiPathClusterDescriptor.calculate(mol).getValue().toString();
+		//1.3333333333333333,0.0,0.0,0.15158765939669258,0.0,0.0
+		
+		ChiPathDescriptor chiPathDescriptor = new ChiPathDescriptor();
+		res[23] = chiPathDescriptor.calculate(mol).getValue().toString();
+		//5.1547005383792515,2.6427344100918364,2.4880338717125854,1.3333333333333333,0.0,0.0,0.0,0.0,3.263710176427684,1.381855088213842,0.8613387822563803,0.3011756846163858,0.0,0.0,0.0,0.0
+		
+		CPSADescriptor cpsaDescriptor = new CPSADescriptor();
+		res[24] = cpsaDescriptor.calculate(mol).getValue().toString();
+		//140.32388281172152,95.6262851835687,24.562811392636654,171.84146932239426,-117.10452292597267,-38.809814031570944,-31.517586510672743,212.73080810954139,63.3726254242076,0.4495178015510001,0.3063321554740794,0.07868525838858542,0.5504821984489999,-0.3751361966515137,-0.12432454071615566,43.804254290747444,29.8512129876061,7.6676586677862915,53.642952782269056,-36.555974635683896,-12.115079263424892,0.5260762795465771,0.4202683711578809,4.367718842917026,23.267281221754594,123.0044624995601,189.16088963455564,0.3940362428393835,0.6059637571606165
+		
+		EccentricConnectivityIndexDescriptor eccentricConnectivityIndexDescriptor = new EccentricConnectivityIndexDescriptor();
+		res[25] = eccentricConnectivityIndexDescriptor.calculate(mol).getValue().toString();
+		//24
+		
+		FMFDescriptor FMFDescriptor = new FMFDescriptor();
+		res[26] = FMFDescriptor.calculate(mol).getValue().toString();
+		//0.0
+		
+		FragmentComplexityDescriptor fragmentComplexityDescriptor = new FragmentComplexityDescriptor();
+		res[27] = fragmentComplexityDescriptor.calculate(mol).getValue().toString();
+		//51.03
+		
+		GravitationalIndexDescriptor gravitationalIndexDescriptor = new GravitationalIndexDescriptor();
+		res[28] = gravitationalIndexDescriptor.calculate(mol).getValue().toString();
+		//384.0029358395437,19.595992851589422,7.268500894803894,384.0029358395437,19.595992851589422,7.268500894803894,635.260247953745,25.204369620241348,8.596412096065992
+		
+		HBondDonorCountDescriptor hBondDonorCountDescriptor = new HBondDonorCountDescriptor();
+		res[29] = hBondDonorCountDescriptor.calculate(mol).getValue().toString();
+		//1
+		
+		HybridizationRatioDescriptor hybridizationRatioDescriptor = new HybridizationRatioDescriptor();
+		res[30] = hybridizationRatioDescriptor.calculate(mol).getValue().toString();
+		//0.3333333333333333
+		
+//		IPMolecularLearningDescriptor ipMolecularLearningDescriptor = new IPMolecularLearningDescriptor();
+//		res[31] = ipMolecularLearningDescriptor.calculate(mol).getValue().toString();
+//		//NaN
+		
+		KappaShapeIndicesDescriptor kappaShapeIndicesDescriptor = new KappaShapeIndicesDescriptor();
+		res[31] = kappaShapeIndicesDescriptor.calculate(mol).getValue().toString();
+		//6.0,2.2222222222222223,3.0
+		
+		KierHallSmartsDescriptor kierHallSmartsDescriptor = new KierHallSmartsDescriptor();
+		res[32] = kierHallSmartsDescriptor.calculate(mol).getValue().toString();
+		//0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+		
+		LargestChainDescriptor largestChainDescriptor = new LargestChainDescriptor();
+		res[33] = largestChainDescriptor.calculate(mol).getValue().toString();
+		//4
+		
+		LargestPiSystemDescriptor largestPiSystemDescriptor = new LargestPiSystemDescriptor();
+		res[34] = largestPiSystemDescriptor.calculate(mol).getValue().toString();
+		//5
+		
+		LengthOverBreadthDescriptor lengthOverBreadthDescriptor = new LengthOverBreadthDescriptor();
+		res[35] = lengthOverBreadthDescriptor.calculate(mol).getValue().toString();
+		//1.0980943964400556,1.0980943964400556
+		
+		LongestAliphaticChainDescriptor longestAliphaticChainDescriptor = new LongestAliphaticChainDescriptor();
+		res[36] = longestAliphaticChainDescriptor.calculate(mol).getValue().toString();
+		//3
+		
+		MannholdLogPDescriptor mannholdLogPDescriptor = new MannholdLogPDescriptor();
+		res[37] = mannholdLogPDescriptor.calculate(mol).getValue().toString();
+		//1.46
+		
+		MDEDescriptor mdeDescriptor = new MDEDescriptor();
+		res[38] = mdeDescriptor.calculate(mol).getValue().toString();
+		//0.0,0.0,1.4142135623730951,0.0,0.0,0.0,0.0,1.0,0.0,0.0,1.1447142425533319,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+		
+		PetitjeanNumberDescriptor petitjeanNumberDescriptor = new PetitjeanNumberDescriptor();
+		res[39] = petitjeanNumberDescriptor.calculate(mol).getValue().toString();
+		//0.3333333333333333
+		
+		PetitjeanShapeIndexDescriptor petitjeanShapeIndexDescriptor = new PetitjeanShapeIndexDescriptor();
+		res[40] = petitjeanShapeIndexDescriptor.calculate(mol).getValue().toString();
+		//0.5,0.5275148343475432
+		
+		RuleOfFiveDescriptor ruleOfFiveDescriptor = new RuleOfFiveDescriptor();
+		res[41] = ruleOfFiveDescriptor.calculate(mol).getValue().toString();
+		//0
+		
+//		VABCDescriptor vABCDescriptor = new VABCDescriptor();
+//		res[42] = vABCDescriptor.calculate(mol).getValue().toString();
+//		//NaN
+
+		VAdjMaDescriptor vAdjMaDescriptor = new VAdjMaDescriptor();
+		res[42] = vAdjMaDescriptor.calculate(mol).getValue().toString();
+		//3.321928094887362
+		
+		WeightedPathDescriptor weightedPathDescriptor = new WeightedPathDescriptor();
+		res[43] = weightedPathDescriptor.calculate(mol).getValue().toString();
+		//10.523645880122448,1.753940980020408,6.976067743425171,6.976067743425171,0.0
+		
+		WHIMDescriptor WHIMDescriptor = new WHIMDescriptor();
+		res[44] = WHIMDescriptor.calculate(mol).getValue().toString();
+		//0.0,1.1249834998863055,1.6875340026136945,0.0,0.3999916441004639,1.0,1.0,1.0,NaN,0.6666666663432467,0.8181894514548632,2.8125175025,1.8984479084374999,4.7109654109375,0.20000626692465215,1.0,NaN
+		
+		WienerNumbersDescriptor WienerNumbersDescriptor = new WienerNumbersDescriptor();
+		res[45] = WienerNumbersDescriptor.calculate(mol).getValue().toString();
+		//29.0,4.0
+		
+		ZagrebIndexDescriptor ZagrebIndexDescriptor = new ZagrebIndexDescriptor();
+		res[46] = ZagrebIndexDescriptor.calculate(mol).getValue().toString();
+		//22.0
+
+ 		System.out.println(res[46]);
+
+		
+		
+		
+		
+		
+		
+		
+		
 		StringBuffer sb=new StringBuffer();
 		for(int i=0;i<res.length;i++)
 			sb.append(res[i]).append(",");
@@ -213,6 +407,7 @@ public class FeatureGeneration {
 	
 		double ASA = ns.getTotalSurfaceArea();
 		molecular = sb.toString() + String.valueOf(ASA);
+		
 		return molecular;
 	}
 
@@ -599,6 +794,7 @@ public class FeatureGeneration {
 			res[5] = pt.getValue().toString();
 			DescriptorValue pe = pen.calculate(a, mol);
 			res[6]= pe.getValue().toString();
+			//System.out.println(a.getAtomTypeName() + ", mole: " + mol.getProperties());
 			DescriptorValue se = sen.calculate(a, mol);
 			res[7] = se.getValue().toString();
 			DescriptorValue sp = spc.calculate(a, mol);
