@@ -1,5 +1,8 @@
 # BIOIN-401
 This is Bioinformatics 401 project repo
+biotech is eclipse project developed in mac
+test is same eclipse project developed in windows
+they will become same eventually (after everything is settle)
 
 #Open source:<br/>
 Weka 3: Data Mining Software in Java (machine learning station)<br/>
