@@ -26,7 +26,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.opencsv.CSVReader;
@@ -40,9 +42,13 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.fingerprint.IBitFingerprint;
+import org.openscience.cdk.fingerprint.MACCSFingerprinter;
+import org.openscience.cdk.fingerprint.PubchemFingerprinter;
 import org.openscience.cdk.exception.CDKException;
 
 
@@ -53,10 +59,10 @@ public class GeneratingFeatures
 {
 	
 	
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * take single smile string to get the arff file for weka prediction.
 	 * @param: smiles_String
@@ -182,13 +188,59 @@ public class GeneratingFeatures
 		FeatureGeneration featureGeneration = new FeatureGeneration();
 		// featureGeneration.readFile(tempFile) will read the sdf file (with all sdf molecule
 		// then pass them to IAtomContainerSet moleSet
+		ArrayList<String> Attribute = new ArrayList<String>();
 		IAtomContainerSet moleSet = featureGeneration.readFile(tempFile);
+		ArrayList<String> all_Value_Array = new ArrayList<String>();
+		String AttribString = "";
 		for(int i = 0 ; i < moleSet.getAtomContainerCount(); i++) {
+			
 			
 			IAtomContainer mole = moleSet.getAtomContainer(i);
 			
-	    	 	CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mole.getBuilder());
-	    	 	System.out.println(mole.getProperties());
+			ChemSearcher newChemSearcher = new ChemSearcher();
+			ArrayList[] testArrayList = new ArrayList[2];
+			testArrayList = newChemSearcher.generateClassyfireFingerprint(mole);
+			
+			Attribute = testArrayList[0];
+			
+			for(String attrib : Attribute) {
+				String temp = attrib.toString();
+				AttribString += temp;
+				AttribString += ",";
+			}
+			AttribString = AttribString.substring(0, AttribString.length()-1);
+			//System.out.println(AttribString);
+			
+			//get all values
+			ArrayList<String> Value = new ArrayList<String>();
+			Value = testArrayList[1];
+			String ValueString = "";
+			for(String values : Value) {
+				String temp = values.toString();
+				ValueString += temp;
+				ValueString += ",";
+				
+			}
+			ValueString = ValueString.substring(0, ValueString.length()-1);
+			
+			//System.out.println(ValueString);
+			
+			
+			
+			
+			//PubchemFingerprinter
+			PubchemFingerprinter fprinter = new PubchemFingerprinter(SilentChemObjectBuilder.getInstance());
+			MACCSFingerprinter maccs 	=  new MACCSFingerprinter(SilentChemObjectBuilder.getInstance());
+			IBitFingerprint maccs_fingerp = maccs.getBitFingerprint(mole);
+			int[] maccs_onbits = maccs_fingerp.getSetbits();
+			
+			//LinkedHashMap<String, String> fpatterns = maccs.getRINFingerprintPatterns();
+			
+			System.out.println(Arrays.toString(maccs_onbits));
+			System.out.println(maccs_onbits.length);
+			
+	    	CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mole.getBuilder());
+	    	System.out.println(mole.getProperties());
 			String molecularFeatures = featureGeneration.generateMolecularFeatures(mole);
 			String[] molecularFeature = molecularFeatures.split(",");
 			
@@ -219,10 +271,22 @@ public class GeneratingFeatures
 				questionMark[0] = "?";
 				molecularFeature = ArrayUtils.addAll(molecularFeature,questionMark);
 			}
-			//System.out.println(Arrays.toString(combinedFeature)); //works
 			
-			writer.writeNext(molecularFeature);
 			
+			
+			
+			all_Value_Array.add(ValueString);
+			 
+			//writer.writeNext(molecularFeature);
+			
+		}
+		
+		String[] tempAttributeArray = AttribString.split(",");
+		writer.writeNext(tempAttributeArray);
+		for(String single_value : all_Value_Array) {
+			String temp = single_value.toString();
+			String[] tempArray = temp.split(",");
+			writer.writeNext(tempArray);
 		}
 		
 		
@@ -263,12 +327,12 @@ public class GeneratingFeatures
     		
     		
     		String path_input_file = args[0];  //return the path of the file
-    		//String output_path = generating_feature(path_input_file,isPredict);
+    		String output_path = generating_feature(path_input_file,isPredict);
     		
     		ConvertTOArff newConverting = new ConvertTOArff();
     		//newConverting.CSVToArff(output_path);
-    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\Output.csv";
-    		ConvertTOArff.CSVToArff(temp_output_path);
+    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\XuanMDR1TrainingSet(output).csv";
+    		//ConvertTOArff.CSVToArff(temp_output_path);
     		
     		
     		
