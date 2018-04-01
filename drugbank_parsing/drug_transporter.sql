@@ -49,3 +49,10 @@ with drug(drugname) as (select drug_name from drugbank_transport where drug_tran
 drug2(drugname) as (select drug_name from drugbank_transport where drug_name not in (select * from drug))
 /*drug3(drugname) as (select drug_name from drugbank_transport group by drug_name)*/
 select drugname from drug2 group by drugname;
+
+// come with smiles string
+with drug(drugname) as (select drug_name from drugbank_transport where drug_transport_name = 'Multidrug resistance protein 1' group by drug_name),
+drug2(drugname) as (select drug_name from drugbank_transport where drug_name not in (select * from drug)),
+drug_simle(drugname, drugsmiles) as (select drug2.drugname, drugbank.drug_smiles from drug2, drugbank_drug drugbank where drugbank.drug_name = drug2.drugname)
+/*drug3(drugname) as (select drug_name from drugbank_transport group by drug_name)*/
+select * from drug_simle group by drugname;
