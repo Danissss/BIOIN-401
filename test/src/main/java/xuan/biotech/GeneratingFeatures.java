@@ -34,6 +34,8 @@ import java.util.List;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
+import weka.core.Attribute;
+
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -44,6 +46,7 @@ import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
@@ -59,14 +62,156 @@ public class GeneratingFeatures
 {
 	
 	
+	
+	public String generateAllFeatures(IAtomContainer mole, String CalculatingType) throws Exception{
+		
+		 ArrayList<Attribute> atts = new ArrayList<Attribute>();
+		 //IAtomContainerSet set = readFile(pathToInputFile);
+		 //Add attribute names
+		 //String names = "InChiKey\tPubChemID\tHMDB\tDrugBank\t1A2\t2A6\t2B6\t2C8\t2C9\t2C19\t2D6\t2|E1\t3A4\tName\tIsomericSmiles";
+		 String moleculeFeatures = "nHBAcc\tnHBDon\tnaAromAtom\tnAtomP\tnB\tnAromBond\tnRotB\tALogP\tALogp2\tAMR\tXLogP\tMLogP\tapol\tTopoPSA\tMW\tbpol\tATSc1\tATSc2\tATSc3\tATSc4\tATSc5\tATSm1\tATSm2\tATSm3\tATSm4\tATSm5\tnAcid\tnBase\tMOMI-X\tMOMI-Y\tMOMI-Z\tMOMI-XY\tMOMI-XZ\tMOMI-YZ\tMOMI-R\tAllSurfaceArea";
+		 LinkedHashMap<String, String> fpatterns = ChemSearcher.getRINFingerprintPatterns();
+		 String[] labels = fpatterns.keySet().toArray(new String[fpatterns.size()]);
+		 String newMoleculeFeatures = moleculeFeatures.replaceAll("\t", ",");
+		
 
+		 String rinFPnames = "\t" + StringUtils.join(labels,"\t");
+		 
+		 String rinFPnames2 = StringUtils.join(labels,"\t");
+		 String newrinFPnames = rinFPnames2.replaceAll("\t", ",");
+		
+		 String firstNames = moleculeFeatures+rinFPnames;
+		 String[] fnames = firstNames.split("\t");
+		 
+//		 for(int j = 0; j<fnames.length; j++){
+//			 fnames[j] = fnames[j].replace(",", "-");
+//			 Attribute Attribute = new Attribute(fnames[j]);
+//			 atts.add(Attribute);
+//		 }
+//		 for(int h = 0; h < 881; h++){
+//				
+//			 Attribute Attribute = new Attribute(String.format("pubchem_f%03d", h+1));
+//			 atts.add(Attribute);
+//		 }
+//
+//		 for(int h = 0; h < 166; h++){
+//			 Attribute Attribute = new Attribute(String.format("maccs_k%03d", h+1));
+//			 atts.add(Attribute);
+//		}
+		if(CalculatingType == "fingerprint") {
+			return newrinFPnames;
+		}
+		else {
+			
+			return newMoleculeFeatures;
+		}
+		
+	}
+	
+	
+	/**
+	 * Given an IAtomContainer of a molecule, generate a string that contains all raw feature values for that molecule
+	 * @param IAtomContainer molecule
+	 * @return IAtomContainerSet that contains all molecules in the sdf file        
+	 * @throws Exception
+	 * @author Siyan Tian
+	 */
+	
+	
+	public String generateOneinstance(IAtomContainer mole,String featureType ) throws Exception {
+		StringBuffer sb = new StringBuffer();
+		ChemSearcher cs = new ChemSearcher();
+		PubchemFingerprinter pbf 	= new PubchemFingerprinter(SilentChemObjectBuilder.getInstance());
+		MACCSFingerprinter maccs 	=  new MACCSFingerprinter(SilentChemObjectBuilder.getInstance());
 
+		LinkedHashMap<String, String> fpatterns = cs.getRINFingerprintPatterns();
+		FeatureGeneration fgen = new FeatureGeneration();
+		
+		IAtomContainer container = mole;
+		
+	
+		IAtomContainer prepContainer = MoleculeExplorer.preprocessContainer(container);
+		String[] gg = fgen.generateExtendedMolecularFeatures(prepContainer).split(",");
+		
+		//this is molecular featuresm
+		String extendedFeatures = StringUtils.join(fgen.generateExtendedMolecularFeatures(prepContainer).split(","), "\t");
+		String molecularFeatures = StringUtils.join(fgen.generateExtendedMolecularFeatures(prepContainer).split(","), ",");
+		//String[] length = molecularFeatures.split(",");
+		//System.out.println(length.length);
+		
+		
+		// nonBitFeature contains the feature that don't have bit feature
+		String nonBitFeature = extendedFeatures;
+		String[] nonBitFeatures = nonBitFeature.split("\t");
+		
+		ArrayList<Double> bioTransformerFingerprint_bits = cs.generateClassyfireFingerprintAsDouble(prepContainer, fpatterns).getBitValues();
+		
+		//print bioTransformerFingerprint_bits separated by comma
+		String bioTFinger_bits = "";
+		for(int x = 0; x < bioTransformerFingerprint_bits.size(); x++){
+			bioTFinger_bits =  bioTFinger_bits + String.valueOf(bioTransformerFingerprint_bits.get(x)) + ",";
+		}
+		
+		//bioTFinger_bits
+		bioTFinger_bits = bioTFinger_bits.substring(0, bioTFinger_bits.length()-1);
+		
+		
+		//extendedFeatures = molecular Features + bioTFinger_bits
+		for(int x = 0; x < bioTransformerFingerprint_bits.size(); x++){
+			extendedFeatures =  extendedFeatures + "\t" + String.valueOf(bioTransformerFingerprint_bits.get(x));
 
+		}
+		
+		
+		ArrayList<Double> fingerprint_bits = new ArrayList<Double>();
+		IBitFingerprint fingerp	= pbf.getBitFingerprint(prepContainer);
+
+		int[] onbits = fingerp.getSetbits();
+
+		for(int kp = 0; kp < 881; kp++){
+			fingerprint_bits.add(0.0);
+		}
+		for(int o = 0; o < onbits.length; o++){
+			fingerprint_bits.set(onbits[o], 1.0);
+		}
+		
+		extendedFeatures =  extendedFeatures + "\t" + StringUtils.join(fingerprint_bits,"\t");
+			
+		ArrayList<Double> maccs_fingerprint_bits = new ArrayList<Double>();
+		IBitFingerprint maccs_fingerp		= maccs.getBitFingerprint(prepContainer);
+			
+		int[] maccs_onbits = maccs_fingerp.getSetbits();
+			
+		for(int kp = 0; kp < 166; kp++){
+			maccs_fingerprint_bits.add(0.0);
+		}
+		for(int o = 0; o < maccs_onbits.length; o++){
+			maccs_fingerprint_bits.set(maccs_onbits[o], 1.0);
+		}
+		
+		//System.out.println("4::"+extendedFeatures);
+		extendedFeatures =  extendedFeatures + "\t" + StringUtils.join(maccs_fingerprint_bits,"\t");
+		
+		String finalFeatureValues = extendedFeatures;
+		String[] temp = extendedFeatures.split("\t");
+		
+		
+		//select which to return:
+		if(featureType == "FingerPrint") {
+			return finalFeatureValues;
+		}
+		else {
+			return molecularFeatures;
+		}
+	
+	}
+	
 
 	/**
 	 * take single smile string to get the arff file for weka prediction.
 	 * @param: smiles_String
 	 * @return: the file_path that contain the value for predicting on the model (class)
+	 * @author xuan Cao
 	 */
 	 
 	 public static String generating_feature(String smileString) throws Exception{
@@ -133,6 +278,156 @@ public class GeneratingFeatures
 		 
 	 }
 	 
+	 
+	 
+	 
+	 /**
+		 * read_csv
+		 * function: parse the csv file into java object
+		 * notes: nextLine[n]; n might be change due to the table
+		 * if it is predicting setting, it will add "?" at the end of string 
+		 * @param:  path to csv_file in string
+		 * @param:  isPredicting
+		 * @return: java object
+		 * 
+		 */
+	 
+	 public static String generating_fingerPrint(String csv_file_path, boolean isPredicting) throws Exception{
+		 
+		 CSVReader reader = new CSVReader(new FileReader(csv_file_path));
+		 String output_path = "C:\\Users\\xcao\\Desktop\\Output.csv";
+		 CSVWriter writer = new CSVWriter(new FileWriter(output_path));
+			
+			
+		 String tempFile = "C:\\Users\\xcao\\Desktop\\temp.sdf";
+		 SDFWriter sdw  = new SDFWriter(new FileWriter(tempFile));
+		 String [] nextLine;
+		 
+		 
+		 //this loop will read all smile string, and convert it to sdf format of molecule
+	     //then, write it back to sdf file SDFWriter sdw
+	     while ((nextLine = reader.readNext()) != null) {    
+	    	    String smile_string = nextLine[0];    //contain smile string
+	    	    
+	    	    
+	    	    
+ 	 		SmilesParser temp_smiles = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+ 	 		IAtomContainer atom_container   = temp_smiles.parseSmiles(smile_string);
+	 		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+	 		sdg.setMolecule(atom_container);
+	 		sdg.generateCoordinates();
+	 		IAtomContainer mole = sdg.getMolecule();
+	 		HashMap<Object,Object> properties = new HashMap<Object,Object>();
+	 		properties.put("SMILES", smile_string);
+	 		mole.addProperties(properties);
+	 		
+	 		try {
+	 			sdw.write(mole);
+	 		} catch (Exception e) {
+	 			System.out.println(smile_string);
+	 			
+	 		}
+	        
+	     }
+	     sdw.close();
+	     	// featureGeneration.readFile(tempFile) will read the sdf file (with all sdf molecule
+	  		// then pass them to IAtomContainerSet moleSet
+	     	FeatureGeneration featureGeneration = new FeatureGeneration();
+			IAtomContainerSet moleSet = featureGeneration.readFile(tempFile);
+			ArrayList<String> Attribute = new ArrayList<String>();
+			//get the attribute of fingerprint:
+			IAtomContainer attributeMole = moleSet.getAtomContainer(0);
+			ChemSearcher ChemSearcher_for_attribute = new ChemSearcher();
+			ArrayList[] testArrayList_for_attribute = new ArrayList[2];
+			testArrayList_for_attribute = ChemSearcher_for_attribute.generateClassyfireFingerprint(attributeMole);
+			String AttribString = "";
+			Attribute = testArrayList_for_attribute[0];
+			for(String attrib : Attribute) {
+				String temp = attrib.toString();
+				AttribString += temp;
+				AttribString += ",";
+			}
+			AttribString = AttribString.substring(0, AttribString.length()-1);
+			AttribString += "\n";
+			
+			ArrayList<String> all_Value_Array = new ArrayList<String>();
+			for(int i = 0 ; i < moleSet.getAtomContainerCount(); i++) {
+				
+				GeneratingFeatures GF = new GeneratingFeatures();
+				
+				IAtomContainer mole = moleSet.getAtomContainer(i);
+				String output = GF.generateOneinstance(mole,"MoelcularFeature");
+				String FingerPrint = "fingerprint";
+				String Attributes = GF.generateAllFeatures(mole,"NA");
+//				String[] LenAttributes = Attributes.split(",");
+//				System.out.println(Attributes);
+//				System.out.println(LenAttributes.length);
+				
+				System.out.println(mole.getProperties());
+				
+				System.exit(0);
+				
+				
+				ChemSearcher newChemSearcher = new ChemSearcher();
+				ArrayList[] testArrayList = new ArrayList[2];
+				testArrayList = newChemSearcher.generateClassyfireFingerprint(mole);
+				
+				//get all values
+				ArrayList<String> Value = new ArrayList<String>();
+				Value = testArrayList[1];
+				//System.out.println(Value.size());
+				String ValueString = "";
+				for(String values : Value) {
+					
+					String temp = values.toString();
+					ValueString += temp;
+					ValueString += ",";
+					
+					
+				}
+				ValueString = ValueString.substring(0, ValueString.length()-1);
+				ValueString += "\n";
+				//System.out.println(ValueString);
+				
+				
+				
+				
+//				//PubchemFingerprinter
+//				PubchemFingerprinter fprinter = new PubchemFingerprinter(SilentChemObjectBuilder.getInstance());
+//				MACCSFingerprinter maccs 	=  new MACCSFingerprinter(SilentChemObjectBuilder.getInstance());
+//				IBitFingerprint maccs_fingerp = maccs.getBitFingerprint(mole);
+//				int[] maccs_onbits = maccs_fingerp.getSetbits();
+//				
+//				//LinkedHashMap<String, String> fpatterns = maccs.getRINFingerprintPatterns();
+//				
+//				System.out.println(Arrays.toString(maccs_onbits));
+//				System.out.println(maccs_onbits.length);
+		 
+				all_Value_Array.add(ValueString);
+				ValueString = "";
+			}
+			
+			String[] tempAttributeArray = AttribString.split(",");
+			writer.writeNext(tempAttributeArray);
+			for(String single_value : all_Value_Array) {
+				String temp = single_value.toString();
+				String[] tempArray = temp.split(",");
+				writer.writeNext(tempArray);
+			}
+			
+			
+			File checkFile = new File(tempFile);
+			if(checkFile.exists()) {
+				checkFile.delete();
+				System.out.println("Temp File deleted");
+			}
+			reader.close();
+			writer.close();
+		 
+
+		 return "ok";
+	 }
+	 
 	/**
 	 * read_csv
 	 * function: parse the csv file into java object
@@ -157,139 +452,62 @@ public class GeneratingFeatures
 	     
 	     //this loop will read all smile string, and convert it to sdf format of molecule
 	     //then, write it back to sdf file SDFWriter sdw
-	     while ((nextLine = reader.readNext()) != null) {    
-	    	    String smile_string = nextLine[0];    //contain smile string
+	     while ((nextLine = reader.readNext()) != null) {
+	    	 String smile_string = nextLine[0];    //contain smile string
 	    	    
-	    	    
-	    	    
- 	 		SmilesParser temp_smiles = new SmilesParser(DefaultChemObjectBuilder.getInstance());
- 	 		IAtomContainer atom_container   = temp_smiles.parseSmiles(smile_string);
-	 		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
-	 		sdg.setMolecule(atom_container);
-	 		sdg.generateCoordinates();
-	 		IAtomContainer mole = sdg.getMolecule();
-	 		HashMap<Object,Object> properties = new HashMap<Object,Object>();
-	 		properties.put("SMILES", smile_string);
-	 		mole.addProperties(properties);
+ 	 		 SmilesParser temp_smiles = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+ 	 		 IAtomContainer atom_container   = temp_smiles.parseSmiles(smile_string);
+	 		 StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+	 		 sdg.setMolecule(atom_container);
+	 		 sdg.generateCoordinates();
+	 		 IAtomContainer mole = sdg.getMolecule();
+	 		 HashMap<Object,Object> properties = new HashMap<Object,Object>();
+	 		 properties.put("SMILES", smile_string);
+	 		 mole.addProperties(properties);
 	 		
-	 		try {
-	 			sdw.write(mole);
-	 		} catch (Exception e) {
-	 			System.out.println(smile_string);
-	 			
-	 		}
-	        
-	        
-	        
-	        
-	     }
+	 		 try {
+	 			 sdw.write(mole);
+	 		 } catch (Exception e) {
+	 			 System.out.println(smile_string);
+	 		 }
+	 	}
 	     sdw.close();
 
-		FeatureGeneration featureGeneration = new FeatureGeneration();
-		// featureGeneration.readFile(tempFile) will read the sdf file (with all sdf molecule
-		// then pass them to IAtomContainerSet moleSet
-		ArrayList<String> Attribute = new ArrayList<String>();
-		IAtomContainerSet moleSet = featureGeneration.readFile(tempFile);
-		ArrayList<String> all_Value_Array = new ArrayList<String>();
-		String AttribString = "";
-		for(int i = 0 ; i < moleSet.getAtomContainerCount(); i++) {
-			
-			
+	     FeatureGeneration featureGeneration = new FeatureGeneration();
+	     IAtomContainerSet moleSet = featureGeneration.readFile(tempFile);
+	     ArrayList<String[]> molecularFeatureList = new ArrayList<String[]>();
+	     String Attributes = null;
+	     for(int i = 0 ; i < moleSet.getAtomContainerCount(); i++) {
 			IAtomContainer mole = moleSet.getAtomContainer(i);
-			
-			ChemSearcher newChemSearcher = new ChemSearcher();
-			ArrayList[] testArrayList = new ArrayList[2];
-			testArrayList = newChemSearcher.generateClassyfireFingerprint(mole);
-			
-			Attribute = testArrayList[0];
-			
-			for(String attrib : Attribute) {
-				String temp = attrib.toString();
-				AttribString += temp;
-				AttribString += ",";
-			}
-			AttribString = AttribString.substring(0, AttribString.length()-1);
-			//System.out.println(AttribString);
-			
-			//get all values
-			ArrayList<String> Value = new ArrayList<String>();
-			Value = testArrayList[1];
-			String ValueString = "";
-			for(String values : Value) {
-				String temp = values.toString();
-				ValueString += temp;
-				ValueString += ",";
-				
-			}
-			ValueString = ValueString.substring(0, ValueString.length()-1);
-			
-			//System.out.println(ValueString);
-			
-			
-			
-			
-			//PubchemFingerprinter
-			PubchemFingerprinter fprinter = new PubchemFingerprinter(SilentChemObjectBuilder.getInstance());
-			MACCSFingerprinter maccs 	=  new MACCSFingerprinter(SilentChemObjectBuilder.getInstance());
-			IBitFingerprint maccs_fingerp = maccs.getBitFingerprint(mole);
-			int[] maccs_onbits = maccs_fingerp.getSetbits();
-			
-			//LinkedHashMap<String, String> fpatterns = maccs.getRINFingerprintPatterns();
-			
-			System.out.println(Arrays.toString(maccs_onbits));
-			System.out.println(maccs_onbits.length);
-			
 	    	CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mole.getBuilder());
+	    	GeneratingFeatures GF = new GeneratingFeatures();
+			String FingerPrint = "fingerprint";
+			Attributes = GF.generateAllFeatures(mole,"molecularFeatures");
+			
+			String Features = GF.generateOneinstance(mole,"molecularFeatures");
+			System.out.println(Attributes);
+			System.out.println(Features);
 	    	System.out.println(mole.getProperties());
-			String molecularFeatures = featureGeneration.generateMolecularFeatures(mole);
-			String[] molecularFeature = molecularFeatures.split(",");
-			
-//			String[] atomicFeatures = featureGeneration.generateAtomicFeatures(mole);
-//			System.out.println(Arrays.toString(atomicFeatures));
-			
-//			String[] combinedFeature;
-//			
-//			String combinedAtomicFeature = atomicFeatures[0];
-//			
-//			for (int lenAtomicFea = 1; lenAtomicFea < atomicFeatures.length; lenAtomicFea++) {
-//				
-//				String eachFeature = atomicFeatures[lenAtomicFea];
-//				combinedAtomicFeature = combinedAtomicFeature +","+ eachFeature ;
-//				
-//				
-//			}
-//			combinedAtomicFeature += "\n";
-//			String[] combinedAtomicFeatures = combinedAtomicFeature.split(",");
+	    	// molecular features
+			String[] molecularFeature = Features.split(",");
+			molecularFeatureList.add(molecularFeature);
 			
 			
-//			combinedFeature = ArrayUtils.addAll(molecularFeature,combinedAtomicFeatures);
-			//System.out.println(Arrays.toString(combinedFeature));
-			
-			// if it is predicting setting, add "?" question mark at the end for weka
+//			if it is predicting setting, add "?" question mark at the end for weka
 			if (isPredicting == true) {
 				String[] questionMark = new String[1];
 				questionMark[0] = "?";
 				molecularFeature = ArrayUtils.addAll(molecularFeature,questionMark);
 			}
 			
-			
-			
-			
-			all_Value_Array.add(ValueString);
-			 
 			//writer.writeNext(molecularFeature);
-			
 		}
-		
-		String[] tempAttributeArray = AttribString.split(",");
-		writer.writeNext(tempAttributeArray);
-		for(String single_value : all_Value_Array) {
-			String temp = single_value.toString();
-			String[] tempArray = temp.split(",");
-			writer.writeNext(tempArray);
+	    String[] AttributesArray = Attributes.split(",");
+	    writer.writeNext(AttributesArray);
+	    
+		for(int singleMoleFeatureArr = 0; singleMoleFeatureArr < molecularFeatureList.size(); singleMoleFeatureArr++) {
+			writer.writeNext(molecularFeatureList.get(singleMoleFeatureArr));
 		}
-		
-		
 		File checkFile = new File(tempFile);
 		if(checkFile.exists()) {
 			checkFile.delete();
@@ -328,10 +546,11 @@ public class GeneratingFeatures
     		
     		String path_input_file = args[0];  //return the path of the file
     		String output_path = generating_feature(path_input_file,isPredict);
+    		//String output_path = generating_fingerPrint(path_input_file,isPredict);
     		
     		ConvertTOArff newConverting = new ConvertTOArff();
     		//newConverting.CSVToArff(output_path);
-    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\XuanMDR1TrainingSet(output).csv";
+    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\Output.csv";
     		//ConvertTOArff.CSVToArff(temp_output_path);
     		
     		
