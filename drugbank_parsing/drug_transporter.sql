@@ -39,3 +39,13 @@ select count(*) from MDR1 where transport_id = 1;
 
 # get the csv
 select distinct drug_name, drug_smile, transport_id from ABCG2;
+
+
+
+
+
+# select the drug that doesn't transport particular transporters (scale drug_transporter table)
+with drug(drugname) as (select drug_name from drugbank_transport where drug_transport_name = 'Multidrug resistance protein 1' group by drug_name),
+drug2(drugname) as (select drug_name from drugbank_transport where drug_name not in (select * from drug))
+/*drug3(drugname) as (select drug_name from drugbank_transport group by drug_name)*/
+select drugname from drug2 group by drugname;
