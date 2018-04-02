@@ -9,6 +9,8 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.io.SDFWriter;
@@ -16,13 +18,22 @@ import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 
+import com.mysql.fabric.xmlrpc.base.Array;
 import com.opencsv.CSVWriter;
+
+import weka.core.Instances;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.CSVLoader;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
@@ -54,7 +65,7 @@ public class GUIPredictionClass extends JFrame{
 	/**
 	 * Create the frame.
 	 */
-	public GUIPredictionClass() {
+	public GUIPredictionClass(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 486, 374);
 		contentPane = new JPanel();
@@ -66,69 +77,174 @@ public class GUIPredictionClass extends JFrame{
 		Predict.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0){
 				
+				
+				////////////////////////////////////////////////////////////////////////////////////////
 				// this the main part for prediction
+				// smiles string CAN'T HAVE EMPTY SPACE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				String smilesString = textField.getText();
-				File tempFiles = File.createTempFile("temp.sdf");
-				CSVWriter writer = new CSVWriter(new FileWriter("/predicting.csv"));
-				//GeneratingFeatures GF = new GeneratingFeatures();
+				smilesString = smilesString.replaceAll(" ", "");
+				System.out.println(smilesString);
+				String workingDir = System.getProperty("user.dir");
 				
+				String locationForSDF = workingDir + "\\forTempFile\\temp.sdf";
+				String locationForCSV = workingDir + "\\forTempFile\\temp.csv";
+				CSVWriter writer = null;
 				try {
-					//TODO: create temp file 
-					File tempFiles = File.createTempFile("temp.sdf");
-					String tempFile = "/temp.sdf";
-					SDFWriter sdw  = new SDFWriter(new FileWriter(tempFile));
-					SmilesParser temp_smiles = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-					IAtomContainer atom_container   = temp_smiles.parseSmiles(smilesString);
-					StructureDiagramGenerator sdg = new StructureDiagramGenerator();
-					sdg.setMolecule(atom_container);
+					writer = new CSVWriter(new FileWriter(locationForCSV));
+				} catch (IOException e1) {
+
+					System.out.println(e1);
+				}
+				SDFWriter sdw = null;
+				try {
+					sdw  = new SDFWriter(new FileWriter(locationForSDF));
+				} catch (IOException e) {
+
+					System.out.println("can't find file");
+				}
+				SmilesParser temp_smiles = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+				IAtomContainer atom_container = null;
+				try {
+					atom_container   = temp_smiles.parseSmiles(smilesString);
+				} catch (InvalidSmilesException e) {
+
+					System.out.println(e);
+				}
+				 StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+		 		 sdg.setMolecule(atom_container);
+		 		 try {
 					sdg.generateCoordinates();
-					IAtomContainer mole = sdg.getMolecule();
-					HashMap<Object,Object> properties = new HashMap<Object,Object>();
-					properties.put("SMILES", smilesString);
-					mole.addProperties(properties);
-					try {
-						sdw.write(mole);
-					} catch (Exception e) {
-						String errorMessage = "Couldn't parse this smiles string";
-						GUIerrors error = new GUIerrors();
-						error.main();
-						
-					}
+				} catch (CDKException e) {
+
+					System.out.println(e);
 				}
-				catch (Exception e) {
-					System.out.println(smilesString);
+		 		 IAtomContainer mole = sdg.getMolecule();
+		 		try {
+					sdw.write(mole);
+				} catch (CDKException e) {
+
+					System.out.println(e);
 				}
-				
-				FeatureGeneration featureGeneration = new FeatureGeneration();
-			    IAtomContainerSet moleSet = featureGeneration.readFile(tempFile);
-			    IAtomContainer mole = moleSet.getAtomContainer(0);
-			    CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mole.getBuilder());
-		    	GeneratingFeatures GF = new GeneratingFeatures();
-				String FingerPrint = "fingerprint";
-				String Attributes = GF.generateAllFeatures(mole,"molecularFeatures");
-				String Features = GF.generateOneinstance(mole,"molecularFeatures");
-				String AttributesWithPred = Attributes + ", Association";
-				String FeaturesWithPred = Features +",?";
-				String[] AttributesList = AttributesWithPred.split(",");
-				String[] FeaturesList = FeaturesWithPred.split(",");
-				
-				writer.writeNext(AttributesList);
-				writer.writeNext(FeaturesList);
-				
-				//need to change csvtoarff path (create new method)
-				ConvertTOArff newConverting = new ConvertTOArff();
-				ConvertTOArff.CSVToArff("/temp.csv");
-				
-				//need to delete two files 
-				File checkFile = new File(tempFile);
-				if(checkFile.exists()) {
-					checkFile.delete();
+		 		try {
+					sdw.close();
+				} catch (IOException e) {
+
+					System.out.println(e);
 				}
 		 		
+		 		FeatureGeneration featureGeneration = new FeatureGeneration();
+		 		IAtomContainerSet moleSet = null;
+				try {
+					moleSet = featureGeneration.readFile(locationForSDF);
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				
+				/////////////////////////////////////////////////////////////////////////////////////////
+				//sdf file generated successfully, convert to final atomcontainer and
+				// make the csv file
+				GeneratingFeatures GF = new GeneratingFeatures();
+				IAtomContainer mole2 = moleSet.getAtomContainer(0);
+				
+				String values = null;
+				try {
+					values = GF.generateOneinstance(mole2,"molecularFeatures");
+					values += ",?";
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+				String Attributes = null;
+				try {
+					Attributes = GF.generateAllFeatures(mole2,"molecularFeatures");
+					Attributes += ",Association";
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+				String[] Values = values.split(",");
+				String[] Attributess = Attributes.split(",");
+				writer.writeNext(Attributess);
+				writer.writeNext(Values);
+				try {
+					writer.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				
+				
+				///////////////////////////////////////////////////////////////////////////////////////
+				// csv file successfully created, convert to arff file to feed weka
+				//locationForCSV
+				String arffFilePath = workingDir + "\\forTempFile\\temp.arff";
+				// load CSV
+				CSVLoader loader = new CSVLoader();
+				Instances data = null;
+				try {
+					loader.setSource(new File(locationForCSV));
+					data = loader.getDataSet();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				// save ARFF
+				ArffSaver saver = new ArffSaver();
+				saver.setInstances(data);
+				try {
+					saver.setFile(new File(arffFilePath));
+					saver.writeBatch();
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				
+				File checkFileSDF = new File(locationForSDF);
+				if(checkFileSDF.exists()) {
+					checkFileSDF.delete();
+					System.out.println("Temp File deleted");
+				}
+				File checkFileCSV = new File(locationForCSV);
+				if(checkFileCSV.exists()) {
+					checkFileCSV.delete();
+					System.out.println("Temp File deleted");
+				}
+				
+				
+				
+				//model path:
+				String MDR1Model = workingDir + "\\wekaMachineLearningModel\\MDR1_molecularFeatures.model";
+				
+				// arff exist, put them in weka model to predict
+				MakePrediction MP = new MakePrediction();
+				String resultForMDR1 = null;
+				try {
+					resultForMDR1 = MP.makePrediction_Random_Forest_GUI(MDR1Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				
+				System.out.println(resultForMDR1);
+				
+				
+				
+				
+				
+				File checkFileARFF = new File(arffFilePath);
+				if(checkFileARFF.exists()) {
+					checkFileARFF.delete();
+					System.out.println("Temp File deleted");
+				}
+				System.out.println("finished");
 				
 				
 				
 			}
+			
 		});
 		Predict.setBounds(371, 272, 89, 23);
 		contentPane.add(Predict);
