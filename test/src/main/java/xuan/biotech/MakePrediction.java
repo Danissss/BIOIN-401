@@ -102,7 +102,8 @@ public class MakePrediction {
 	        System.out.println(predict.classAttribute().value((int)result));
 	        String results = predict.classAttribute().value((int)result);
 			
-			results += "+" + TransporterName;
+	        results += " ";
+			results += TransporterName;
 
 		return results;
 		
