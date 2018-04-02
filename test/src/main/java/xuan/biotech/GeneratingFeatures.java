@@ -426,13 +426,15 @@ public class GeneratingFeatures
 	     ArrayList<String[]> molecularFeatureList = new ArrayList<String[]>();
 	     String Attributes = null;
 	     for(int i = 0 ; i < moleSet.getAtomContainerCount(); i++) {
+	    	
 			IAtomContainer mole = moleSet.getAtomContainer(i);
+			System.out.println(mole.getProperties());
 	    	CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mole.getBuilder());
 	    	GeneratingFeatures GF = new GeneratingFeatures();
 			String FingerPrint = "fingerprint";
 			Attributes = GF.generateAllFeatures(mole,"molecularFeatures");
 			String Features = GF.generateOneinstance(mole,"molecularFeatures");
-	    	System.out.println(mole.getProperties());
+	    	
 	    	// molecular features
 			String[] molecularFeature = Features.split(",");
 			molecularFeatureList.add(molecularFeature);
@@ -491,12 +493,12 @@ public class GeneratingFeatures
     		
     		String path_input_file = args[0];  //return the path of the file
     		//String output_path = generating_feature(path_input_file,isPredict);
-    		String output_path = generating_fingerPrint(path_input_file,isPredict);
+    		//String output_path = generating_fingerPrint(path_input_file,isPredict);
     		
     		ConvertTOArff newConverting = new ConvertTOArff();
     		//newConverting.CSVToArff(output_path);
-    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\Output.csv";
-    		//ConvertTOArff.CSVToArff(temp_output_path);
+    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\OutputMDR1.csv";
+    		ConvertTOArff.CSVToArff(temp_output_path);
     		
     		
     		
