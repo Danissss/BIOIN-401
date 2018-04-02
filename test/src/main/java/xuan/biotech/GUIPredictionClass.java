@@ -21,6 +21,8 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import com.mysql.fabric.xmlrpc.base.Array;
 import com.opencsv.CSVWriter;
 
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
@@ -153,14 +155,14 @@ public class GUIPredictionClass extends JFrame{
 				String values = null;
 				try {
 					values = GF.generateOneinstance(mole2,"molecularFeatures");
-					values += ",?";
+					
 				} catch (Exception e) {
 					System.out.println(e);
 				}
 				String Attributes = null;
 				try {
 					Attributes = GF.generateAllFeatures(mole2,"molecularFeatures");
-					Attributes += ",Association";
+					
 				} catch (Exception e) {
 					System.out.println(e);
 				}
@@ -186,12 +188,17 @@ public class GUIPredictionClass extends JFrame{
 				try {
 					loader.setSource(new File(locationForCSV));
 					data = loader.getDataSet();
+					FastVector<String> association = new FastVector<String>();
+					association.addElement("Yes");
+					association.addElement("No");
+					data.insertAttributeAt(new Attribute("Association",association), data.numAttributes());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					System.out.println(e);
 				}
 				// save ARFF
 				ArffSaver saver = new ArffSaver();
+				
 				saver.setInstances(data);
 				try {
 					saver.setFile(new File(arffFilePath));
