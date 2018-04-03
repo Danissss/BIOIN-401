@@ -93,7 +93,7 @@ public class GUIPredictionClass extends JFrame{
 				// smiles string CAN'T HAVE EMPTY SPACE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				String smilesString = textField.getText();
 				smilesString = smilesString.replaceAll(" ", "");
-				System.out.println(smilesString);
+				
 				String workingDir = System.getProperty("user.dir");
 				
 				String locationForSDF = workingDir + "\\forTempFile\\temp.sdf";
@@ -117,28 +117,27 @@ public class GUIPredictionClass extends JFrame{
 				try {
 					atom_container   = temp_smiles.parseSmiles(smilesString);
 				} catch (InvalidSmilesException e) {
-
-					System.out.println(e);
+					GUIerrors raiseError = new GUIerrors(e.toString());
+					raiseError.main(e.toString());
 				}
 				 StructureDiagramGenerator sdg = new StructureDiagramGenerator();
 		 		 sdg.setMolecule(atom_container);
 		 		 try {
 					sdg.generateCoordinates();
 				} catch (CDKException e) {
-
-					System.out.println(e);
+					GUIerrors raiseError = new GUIerrors(e.toString());
+					raiseError.main(e.toString());
 				}
 		 		 IAtomContainer mole = sdg.getMolecule();
 		 		try {
 					sdw.write(mole);
 				} catch (CDKException e) {
-
-					System.out.println(e);
+					GUIerrors raiseError = new GUIerrors(e.toString());
+					raiseError.main(e.toString());
 				}
 		 		try {
 					sdw.close();
 				} catch (IOException e) {
-
 					System.out.println(e);
 				}
 		 		
@@ -296,9 +295,7 @@ public class GUIPredictionClass extends JFrame{
 				window.frmDrugtransporterprediction.setVisible(true);
 				setVisible(false);
 				dispose();
-				
-				
-				
+
 			}
 		});
 		btnHome.setBounds(371, 255, 89, 23);

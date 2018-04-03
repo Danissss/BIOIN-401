@@ -81,6 +81,13 @@ public class GUIMainPage {
 		frmDrugtransporterprediction.getContentPane().add(btnMakePrediction);
 		
 		JButton btnViewDrugs = new JButton("View Drugs");
+		btnViewDrugs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				frmDrugtransporterprediction.dispose();
+				GUIViewDrugs viewDrugs = new GUIViewDrugs();
+				viewDrugs.setVisible(true);
+			}
+		});
 		btnViewDrugs.setToolTipText("");
 		btnViewDrugs.setBackground(Color.LIGHT_GRAY);
 		btnViewDrugs.setBounds(270, 125, 173, 79);
