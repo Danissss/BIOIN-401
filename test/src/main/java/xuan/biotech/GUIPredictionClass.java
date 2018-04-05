@@ -243,10 +243,22 @@ public class GUIPredictionClass extends JFrame{
 				}
 				
 				String Result_for_MDR1 = resultForMDR1.split(" ")[0];
+				String ABCG2Model = workingDir + "\\wekaMachineLearningModel\\ABCG2Model_M.model";
+
+				String resultForABCG2 = null;
+				try {
+					resultForABCG2 = MP.makePrediction_Random_Forest_GUI(ABCG2Model, arffFilePath, "ABCG2");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				
+				String result_For_ABCG2 = resultForABCG2.split(" ")[0];
 				
 				//this table only for previous five transporter
 				firstTable[0] = smilesString;
 				firstTable[1] = Result_for_MDR1;
+				firstTable[2] = result_For_ABCG2;
 				
 				//re-define the table here.
 				

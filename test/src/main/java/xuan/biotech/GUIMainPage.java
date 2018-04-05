@@ -15,7 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.Color;
 import javax.swing.JLabel;
 
-public class GUIMainPage {
+public  class GUIMainPage {
 
 	JFrame frmDrugtransporterprediction;
 	private JButton btnViewDrugs;
