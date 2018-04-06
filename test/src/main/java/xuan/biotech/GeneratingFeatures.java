@@ -465,6 +465,90 @@ public class GeneratingFeatures
 		
 		return output_path;
 	}
+	
+	public static String generating_feature_for_largeScalePrediction(String csv_file_path, boolean isPredicting) throws Exception
+	{
+		
+		CSVReader reader = new CSVReader(new FileReader(csv_file_path));
+		String workingDir = System.getProperty("user.dir");
+		String output_path = workingDir+"\\forTempFile\\temp.csv";
+		CSVWriter writer = new CSVWriter(new FileWriter(output_path));
+		
+		
+	 	String tempFile = workingDir + "\\forTempFile\\temp.sdf";
+	 	SDFWriter sdw  = new SDFWriter(new FileWriter(tempFile));
+	     String [] nextLine;
+	     
+	     //this loop will read all smile string, and convert it to sdf format of molecule
+	     //then, write it back to sdf file SDFWriter sdw
+	     while ((nextLine = reader.readNext()) != null) {
+	    	 String smile_string = nextLine[0];    //contain smile string
+	    	 smile_string = smile_string.replaceAll(" ", "");
+	    	    
+ 	 		 SmilesParser temp_smiles = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+ 	 		 IAtomContainer atom_container   = temp_smiles.parseSmiles(smile_string);
+	 		 StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+	 		 sdg.setMolecule(atom_container);
+	 		 sdg.generateCoordinates();
+	 		 IAtomContainer mole = sdg.getMolecule();
+	 		 HashMap<Object,Object> properties = new HashMap<Object,Object>();
+	 		 properties.put("SMILES", smile_string);
+	 		 mole.addProperties(properties);
+	 		
+	 		 try {
+	 			 sdw.write(mole);
+	 		 } catch (Exception e) {
+	 			 System.out.println(smile_string);
+	 		 }
+	 	}
+	     sdw.close();
+
+	     FeatureGeneration featureGeneration = new FeatureGeneration();
+	     IAtomContainerSet moleSet = featureGeneration.readFile(tempFile);
+	     ArrayList<String[]> molecularFeatureList = new ArrayList<String[]>();
+	     String Attributes = null;
+	     for(int i = 0 ; i < moleSet.getAtomContainerCount(); i++) {
+	    	
+			IAtomContainer mole = moleSet.getAtomContainer(i);
+			System.out.println(mole.getProperties());
+	    	CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(mole.getBuilder());
+	    	GeneratingFeatures GF = new GeneratingFeatures();
+			String FingerPrint = "fingerprint";
+			Attributes = GF.generateAllFeatures(mole,"molecularFeatures");
+			String Features = GF.generateOneinstance(mole,"molecularFeatures");
+	    	
+	    	// molecular features
+			String[] molecularFeature = Features.split(",");
+			molecularFeatureList.add(molecularFeature);
+			
+			
+//			if it is predicting setting, add "?" question mark at the end for weka
+			if (isPredicting == true) {
+				String[] questionMark = new String[1];
+				questionMark[0] = "?";
+				molecularFeature = ArrayUtils.addAll(molecularFeature,questionMark);
+			}
+			
+			//writer.writeNext(molecularFeature);
+		}
+	    
+	    String[] AttributesArray = Attributes.split(",");
+	    writer.writeNext(AttributesArray);
+	    
+		for(int singleMoleFeatureArr = 0; singleMoleFeatureArr < molecularFeatureList.size(); singleMoleFeatureArr++) {
+			
+			writer.writeNext(molecularFeatureList.get(singleMoleFeatureArr));
+		}
+		File checkFile = new File(tempFile);
+		if(checkFile.exists()) {
+			checkFile.delete();
+			System.out.println("Temp File deleted");
+		}
+		reader.close();
+		writer.close();
+		
+		return output_path;
+	}
 	    	 		
 	
 	     
@@ -497,7 +581,7 @@ public class GeneratingFeatures
     		
     		ConvertTOArff newConverting = new ConvertTOArff();
     		//newConverting.CSVToArff(output_path);
-    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\OutputABCG2.csv";
+    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\OutputSLC22A6M.csv";
     		ConvertTOArff.CSVToArff(temp_output_path);
     		
     		

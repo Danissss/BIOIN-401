@@ -77,7 +77,7 @@ public class GUIPredictionClass extends JFrame{
 	 */
 	public GUIPredictionClass(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 482, 336);
+		setBounds(100, 100, 482, 328);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -243,8 +243,8 @@ public class GUIPredictionClass extends JFrame{
 				}
 				
 				String Result_for_MDR1 = resultForMDR1.split(" ")[0];
+				
 				String ABCG2Model = workingDir + "\\wekaMachineLearningModel\\ABCG2Model_M.model";
-
 				String resultForABCG2 = null;
 				try {
 					resultForABCG2 = MP.makePrediction_Random_Forest_GUI(ABCG2Model, arffFilePath, "ABCG2");
@@ -252,13 +252,23 @@ public class GUIPredictionClass extends JFrame{
 					// TODO Auto-generated catch block
 					System.out.println(e);
 				}
-				
 				String result_For_ABCG2 = resultForABCG2.split(" ")[0];
 				
+				
+				String SLC22A6Model = workingDir + "\\wekaMachineLearningModel\\ABCG2Model_M.model";
+				String resultForSLC22A6 = null;
+				try {
+					resultForSLC22A6 = MP.makePrediction_Random_Forest_GUI(ABCG2Model, arffFilePath, "SLC22A6");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				String result_For_SLC22A6 = resultForSLC22A6.split(" ")[0];
 				//this table only for previous five transporter
 				firstTable[0] = smilesString;
 				firstTable[1] = Result_for_MDR1;
 				firstTable[2] = result_For_ABCG2;
+				firstTable[3] = result_For_SLC22A6;
 				
 				//re-define the table here.
 				
@@ -314,7 +324,7 @@ public class GUIPredictionClass extends JFrame{
 		contentPane.add(btnHome);
 		
 		textField = new JTextField();
-		textField.setBounds(10, 33, 450, 20);
+		textField.setBounds(10, 33, 352, 20);
 		contentPane.add(textField);
 		textField.setColumns(10);
 		
@@ -376,5 +386,18 @@ public class GUIPredictionClass extends JFrame{
 			}
 		));
 		scrollPane_1.setViewportView(table_1);
+		
+		JButton btnNewButton = new JButton("Upload File");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				GUILargeScalePrediction largePred = new GUILargeScalePrediction();
+				largePred.main();
+				
+				
+			}
+		});
+		btnNewButton.setBounds(371, 32, 89, 23);
+		contentPane.add(btnNewButton);
 	}
 }

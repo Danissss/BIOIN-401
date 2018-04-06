@@ -7,8 +7,11 @@ import weka.core.converters.ArffLoader;
 import weka.core.converters.CSVLoader;
 import weka.core.converters.ConverterUtils.DataSource;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.ObjectInputStream;
+import java.util.Arrays;
 
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.functions.SMO;
@@ -95,20 +98,40 @@ public class MakePrediction {
 			
 			Instance inst = predict.instance(0);
 			
+			
 			//inst = 9,5,0,3,19,0,11,-2.7457,7.538868,65.6159,-4.23,1.46,39.947481,197.62,307.083806,25.356519,0.831149,-0.338743,-0.11123,0.252759,-0.35329,31.854508,23.493247,31.481472,33.401626,31.993195,2,1,?,?,?,?,?,?,?,?,?
 			//can only have one ? mark at the end
 
 	        double result = RandomForest.classifyInstance(inst);
-	        System.out.println(predict.classAttribute().value((int)result));
+	        
 	        String results = predict.classAttribute().value((int)result);
 			
 	        results += " ";
 			results += TransporterName;
-
+			System.out.println(results);
 		return results;
 		
-		
 	}
+    
+    
+    
+    
+    public String[] makePrediction_Random_Forest_GUILargeScale(String ModelPath, String predictedFilePath, String TransporterName) throws Exception{
+		RandomForest RandomForest = (RandomForest) SerializationHelper.read(new FileInputStream(ModelPath));
+		
+		Instances unlabeled = new Instances(new BufferedReader(new FileReader(predictedFilePath)));
+		unlabeled.setClassIndex(unlabeled.numAttributes()-1);
+		Instances labeled = new Instances(unlabeled);
+		String[] all_result = new String[unlabeled.numInstances()];
+		for (int i = 0; i <unlabeled.numInstances(); i++) {
+			double clsLabel = RandomForest.classifyInstance(unlabeled.instance(i));
+			String results = unlabeled.classAttribute().value((int)clsLabel);
+			all_result[i] = results;
+
+		}
+		
+	return all_result;
+}
 	
 	
 	public static String makePrediction_Random_Forest (String Path_to_model, String predictedFilePath) throws Exception{
@@ -137,26 +160,11 @@ public class MakePrediction {
 		        //System.out.println(result);
 		        System.out.println(predict.classAttribute().value((int)result));
 		    }
-			//double label = RandomForest.classifyInstance(predict.instance(10));
-			//predict.instance(0).setClassValue(label);
-			
-			//System.out.println(predict.instance(0).stringValue(4));
-			
-			
+
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
 		return predictedFilePath;
-		
-		
+			
 	}
 	
 	
