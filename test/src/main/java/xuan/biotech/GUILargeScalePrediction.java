@@ -167,6 +167,22 @@ public class GUILargeScalePrediction extends JFrame {
 					// TODO Auto-generated catch block
 					System.out.println(e);
 				}
+				String ABCG2Model = workingDir + "\\wekaMachineLearningModel\\ABCG2Model_M.model";
+				String[] resultForABCG2 = new String[totalInstanceNumber];
+				try {
+					resultForABCG2 = MP.makePrediction_Random_Forest_GUILargeScale(ABCG2Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				String SLC22A6Model = workingDir + "\\wekaMachineLearningModel\\SLC22A6_M.model";
+				String[] resultForSLC22A6 = new String[totalInstanceNumber];
+				try {
+					resultForSLC22A6 = MP.makePrediction_Random_Forest_GUILargeScale(SLC22A6Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
 				
 				//populated the table
 				
@@ -175,8 +191,9 @@ public class GUILargeScalePrediction extends JFrame {
 				for (int tempInt = 0; tempInt < totalInstanceNumber; tempInt++) {
 					String drugSmiles = smileStrings.get(tempInt);
 					String MDR1Result = resultForMDR1[tempInt];
-					System.out.println(drugSmiles);
-					Object[] tempObject = {drugSmiles,MDR1Result,"","","","","","","","",""};
+					String ABCG2Result = resultForABCG2[tempInt];
+					String SLC22A6Result = resultForSLC22A6[tempInt];
+					Object[] tempObject = {drugSmiles,MDR1Result,ABCG2Result,SLC22A6Result,"","","","","","",""};
 					newtable[tempInt] = tempObject;
 				}
 				

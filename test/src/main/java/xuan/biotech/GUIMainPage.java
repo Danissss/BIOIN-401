@@ -49,7 +49,7 @@ public  class GUIMainPage {
 	 */
 	private void initialize() {
 		frmDrugtransporterprediction = new JFrame();
-		frmDrugtransporterprediction.setTitle("DrugTransporterPrediction");
+		frmDrugtransporterprediction.setTitle("DrugPorter");
 		frmDrugtransporterprediction.setBounds(100, 100, 486, 374);
 		frmDrugtransporterprediction.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmDrugtransporterprediction.getContentPane().setLayout(null);
@@ -58,6 +58,10 @@ public  class GUIMainPage {
 		btnViewTransporter.setBackground(Color.LIGHT_GRAY);
 		btnViewTransporter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				frmDrugtransporterprediction.dispose();
+				GUIViewTransporter viewTrans = new GUIViewTransporter();
+				viewTrans.setVisible(true);
+				
 				
 			}
 		});
