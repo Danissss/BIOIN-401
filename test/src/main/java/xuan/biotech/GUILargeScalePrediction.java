@@ -155,35 +155,89 @@ public class GUILargeScalePrediction extends JFrame {
 					System.out.println(e);
 				}
 				
+				////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				//model path:
-				String MDR1Model = workingDir + "\\wekaMachineLearningModel\\MDR1_molecularFeatures.model";
-				
+				String MDR1Model = workingDir + "\\wekaMachineLearningModel\\MDR1MRandomForest.model";
 				// arff exist, put them in weka model to predict
 				MakePrediction MP = new MakePrediction();
 				String[] resultForMDR1 = new String[totalInstanceNumber];
 				try {
 					resultForMDR1 = MP.makePrediction_Random_Forest_GUILargeScale(MDR1Model, arffFilePath, "MDR1");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					System.out.println(e);
 				}
-				String ABCG2Model = workingDir + "\\wekaMachineLearningModel\\ABCG2Model_M.model";
+				String ABCG2Model = workingDir + "\\wekaMachineLearningModel\\ABCG2MRandomForest.model";
 				String[] resultForABCG2 = new String[totalInstanceNumber];
 				try {
 					resultForABCG2 = MP.makePrediction_Random_Forest_GUILargeScale(ABCG2Model, arffFilePath, "MDR1");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					System.out.println(e);
 				}
-				String SLC22A6Model = workingDir + "\\wekaMachineLearningModel\\SLC22A6_M.model";
+				//
+				String SLC22A6Model = workingDir + "\\wekaMachineLearningModel\\SLC22A6MRandomForest.model";
 				String[] resultForSLC22A6 = new String[totalInstanceNumber];
 				try {
 					resultForSLC22A6 = MP.makePrediction_Random_Forest_GUILargeScale(SLC22A6Model, arffFilePath, "MDR1");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					System.out.println(e);
 				}
-				
+				//
+				String SLCO1B1Model = workingDir + "\\wekaMachineLearningModel\\SLCO1B1MRandomForest.model";
+				String[] resultForSLCO1B1 = new String[totalInstanceNumber];
+				try {
+					resultForSLCO1B1 = MP.makePrediction_Random_Forest_GUILargeScale(SLCO1B1Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+				//
+				String SLC22A8Model = workingDir + "\\wekaMachineLearningModel\\SLC22A8MRandomForest.model";
+				String[] resultForSLC22A8 = new String[totalInstanceNumber];
+				try {
+					resultForSLC22A8 = MP.makePrediction_Random_Forest_GUILargeScale(SLC22A8Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+				//
+				String ABCC2Model = workingDir + "\\wekaMachineLearningModel\\ABCC2MRandomForest.model";
+				String[] resultForABCC2 = new String[totalInstanceNumber];
+				try {
+					resultForABCC2 = MP.makePrediction_Random_Forest_GUILargeScale(ABCC2Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+				//
+				String SLC22A1Model = workingDir + "\\wekaMachineLearningModel\\SLC22A1MRandomForest.model";
+				String[] resultForSLC22A1 = new String[totalInstanceNumber];
+				try {
+					resultForSLC22A1 = MP.makePrediction_Random_Forest_GUILargeScale(SLC22A1Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+				//
+				String SLCO1A2Model = workingDir + "\\wekaMachineLearningModel\\SLCO1A2MRandomForest.model";
+				String[] resultForSLCO1A2 = new String[totalInstanceNumber];
+				try {
+					resultForSLCO1A2 = MP.makePrediction_Random_Forest_GUILargeScale(SLCO1A2Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+				//
+				String SLC22A2Model = workingDir + "\\wekaMachineLearningModel\\SLC22A2MRandomForest.model";
+				String[] resultForSLC22A2 = new String[totalInstanceNumber];
+				try {
+					resultForSLC22A2 = MP.makePrediction_Random_Forest_GUILargeScale(SLC22A2Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+				//
+				String ABCC1Model = workingDir + "\\wekaMachineLearningModel\\ABCC1MRandomForest.model";
+				String[] resultForABCC1 = new String[totalInstanceNumber];
+				try {
+					resultForABCC1 = MP.makePrediction_Random_Forest_GUILargeScale(ABCC1Model, arffFilePath, "MDR1");
+				} catch (Exception e) {
+					System.out.println(e);
+				}
+				//
 				//populated the table
 				
 				Object[][]newtable = new Object[totalInstanceNumber][11];
@@ -193,7 +247,15 @@ public class GUILargeScalePrediction extends JFrame {
 					String MDR1Result = resultForMDR1[tempInt];
 					String ABCG2Result = resultForABCG2[tempInt];
 					String SLC22A6Result = resultForSLC22A6[tempInt];
-					Object[] tempObject = {drugSmiles,MDR1Result,ABCG2Result,SLC22A6Result,"","","","","","",""};
+					String SLCO1B1Result = resultForSLCO1B1[tempInt];
+					String SLC22A8Result = resultForSLC22A8[tempInt];
+					String ABCC2Result = resultForABCC2[tempInt];
+					String SLC22A1Result = resultForSLC22A1[tempInt];
+					String SLCO1A2Result = resultForSLCO1A2[tempInt];
+					String SLC22A2Result = resultForSLC22A2[tempInt];
+					String ABCC1Result = resultForABCC1[tempInt];
+					Object[] tempObject = {drugSmiles,MDR1Result,ABCG2Result,SLC22A6Result,SLCO1B1Result,SLC22A8Result,
+							ABCC2Result,SLC22A1Result,SLCO1A2Result,SLC22A2Result,ABCC1Result};
 					newtable[tempInt] = tempObject;
 				}
 				

@@ -581,7 +581,7 @@ public class GeneratingFeatures
     		
     		ConvertTOArff newConverting = new ConvertTOArff();
     		//newConverting.CSVToArff(output_path);
-    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\OutputSLC22A6M.csv";
+    		String temp_output_path = "C:\\Users\\xcao\\Desktop\\Output.csv";
     		ConvertTOArff.CSVToArff(temp_output_path);
     		
     		

@@ -27,6 +27,7 @@ import org.freehep.graphicsbase.util.Value;
 import javax.swing.JTextArea;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 
 public class GUIViewDrugs extends JFrame {
 
@@ -142,17 +143,6 @@ public class GUIViewDrugs extends JFrame {
 			}
 		});
 		scrollPane.setViewportView(table);
-		
-		JButton btnSearch = new JButton("Search");
-		btnSearch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				GUISearchByDrug search = new GUISearchByDrug();
-				search.setVisible(true);
-				
-			}
-		});
-		btnSearch.setBounds(371, 275, 89, 23);
-		contentPane.add(btnSearch);
 		
 		String[] transporter = { "MDR1", "ABCG2", "SLC22A6", "SLCO1B1", "SLC22A8", "ABCC2", "SLC22A1", "SLCO1A2", "SLC22A2", "ABCC1" };
 		final JComboBox comboBox = new JComboBox(transporter);
@@ -274,12 +264,18 @@ public class GUIViewDrugs extends JFrame {
 				
 			}
 		});
-		btnSearches.setBounds(371, 241, 89, 23);
+		btnSearches.setBounds(371, 275, 89, 23);
 		contentPane.add(btnSearches);
 		
 		textField = new JTextField();
-		textField.setBounds(371, 216, 86, 20);
+		textField.setBounds(371, 252, 86, 20);
 		contentPane.add(textField);
 		textField.setColumns(10);
+		
+		JTextArea txtrDrugName = new JTextArea();
+		txtrDrugName.setBackground(UIManager.getColor("Button.background"));
+		txtrDrugName.setText("Drug Name: ");
+		txtrDrugName.setBounds(371, 229, 89, 22);
+		contentPane.add(txtrDrugName);
 	}
 }

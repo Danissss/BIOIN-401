@@ -53,6 +53,7 @@ public class GUIPredictionClass extends JFrame{
 	private JTable table;
 	private JTable table_1;
 	private String[] firstTable = {"","","","","",""};
+	private String[] secondTable = {"","","","","",""};
 	private ArrayList<String> firstTableData;
 	private ArrayList<String> secondTableData;
 
@@ -228,12 +229,22 @@ public class GUIPredictionClass extends JFrame{
 				}
 				
 				
-				
+				/////////////////////////////////////////////////////////////////////////////////////////////////////
 				//model path:
-				String MDR1Model = workingDir + "\\wekaMachineLearningModel\\MDR1_molecularFeatures.model";
+				String MDR1Model = workingDir + "\\wekaMachineLearningModel\\MDR1MRandomForest.model";
+				String ABCG2Model = workingDir + "\\wekaMachineLearningModel\\ABCG2MRandomForest.model";
+				String SLC22A6Model = workingDir + "\\wekaMachineLearningModel\\SLC22A6MRandomForest.model";
+				String SLCO1B1Model = workingDir + "\\wekaMachineLearningModel\\SLCO1B1MRandomForest.model";
+				String SLC22A8Model = workingDir + "\\wekaMachineLearningModel\\SLC22A8MRandomForest.model";
 				
+				String ABCC2Model = workingDir + "\\wekaMachineLearningModel\\ABCC2MRandomForest.model";
+				String SLC22A1Model = workingDir + "\\wekaMachineLearningModel\\SLC22A1MRandomForest.model";
+				String SLCO1A2Model = workingDir + "\\wekaMachineLearningModel\\SLCO1A2MRandomForest.model";
+				String SLC22A2Model = workingDir + "\\wekaMachineLearningModel\\SLC22A2MRandomForest.model";
+				String ABCC1Model = workingDir + "\\wekaMachineLearningModel\\ABCC1MRandomForest.model";
 				// arff exist, put them in weka model to predict
 				MakePrediction MP = new MakePrediction();
+				
 				String resultForMDR1 = null;
 				try {
 					resultForMDR1 = MP.makePrediction_Random_Forest_GUI(MDR1Model, arffFilePath, "MDR1");
@@ -241,10 +252,8 @@ public class GUIPredictionClass extends JFrame{
 					// TODO Auto-generated catch block
 					System.out.println(e);
 				}
-				
 				String Result_for_MDR1 = resultForMDR1.split(" ")[0];
-				
-				String ABCG2Model = workingDir + "\\wekaMachineLearningModel\\ABCG2Model_M.model";
+				//////////////////////////////////////////////////////////////////////////////////////////////////////
 				String resultForABCG2 = null;
 				try {
 					resultForABCG2 = MP.makePrediction_Random_Forest_GUI(ABCG2Model, arffFilePath, "ABCG2");
@@ -253,23 +262,92 @@ public class GUIPredictionClass extends JFrame{
 					System.out.println(e);
 				}
 				String result_For_ABCG2 = resultForABCG2.split(" ")[0];
-				
-				
-				String SLC22A6Model = workingDir + "\\wekaMachineLearningModel\\ABCG2Model_M.model";
+				//////////////////////////////////////////////////////////////////////////////////////////////////////
 				String resultForSLC22A6 = null;
 				try {
-					resultForSLC22A6 = MP.makePrediction_Random_Forest_GUI(ABCG2Model, arffFilePath, "SLC22A6");
+					resultForSLC22A6 = MP.makePrediction_Random_Forest_GUI(SLC22A6Model, arffFilePath, "SLC22A6");
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println(e);
 				}
 				String result_For_SLC22A6 = resultForSLC22A6.split(" ")[0];
+				//////////////////////////////////////////////////////////////////////////////////////////////////////
+				String resultForSLCO1B1 = null;
+				try {
+					resultForSLCO1B1 = MP.makePrediction_Random_Forest_GUI(SLCO1B1Model, arffFilePath, "SLC22A6");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				String result_For_SLCO1B1 = resultForSLCO1B1.split(" ")[0];
+				//////////////////////////////////////////////////////////////////////////////////////////////////////
+				String resultForSLC22A8 = null;
+				try {
+					resultForSLC22A8 = MP.makePrediction_Random_Forest_GUI(SLC22A8Model, arffFilePath, "SLC22A6");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				String result_For_SLC22A8 = resultForSLC22A8.split(" ")[0];
+				//////////////////////////////////////////////////////////////////////////////////////////////////////
+				String resultForABCC2 = null;
+				try {
+					resultForABCC2 = MP.makePrediction_Random_Forest_GUI(ABCC2Model, arffFilePath, "SLC22A6");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				String result_For_ABCC2 = resultForABCC2.split(" ")[0];
+				//////////////////////////////////////////////////////////////////////////////////////////////////////
+				String resultForSLC22A1 = null;
+				try {
+					resultForSLC22A1 = MP.makePrediction_Random_Forest_GUI(SLC22A1Model, arffFilePath, "SLC22A6");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				String result_For_SLC22A1 = resultForSLC22A1.split(" ")[0];
+				//////////////////////////////////////////////////////////////////////////////////////////////////////
+				String resultForSLCO1A2 = null;
+				try {
+					resultForSLCO1A2 = MP.makePrediction_Random_Forest_GUI(SLCO1A2Model, arffFilePath, "SLC22A6");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				String result_For_SLCO1A2 = resultForSLCO1A2.split(" ")[0];
+				//////////////////////////////////////////////////////////////////////////////////////////////////////
+				String resultForSLC22A2 = null;
+				try {
+					resultForSLC22A2 = MP.makePrediction_Random_Forest_GUI(SLC22A2Model, arffFilePath, "SLC22A6");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				String result_For_SLC22A2 = resultForSLC22A2.split(" ")[0];
+				//////////////////////////////////////////////////////////////////////////////////////////////////////
+				String resultForABCC1 = null;
+				try {
+					resultForABCC1 = MP.makePrediction_Random_Forest_GUI(ABCC1Model, arffFilePath, "SLC22A6");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.out.println(e);
+				}
+				String result_For_ABCC1 = resultForABCC1.split(" ")[0];
+				
 				//this table only for previous five transporter
 				firstTable[0] = smilesString;
 				firstTable[1] = Result_for_MDR1;
 				firstTable[2] = result_For_ABCG2;
 				firstTable[3] = result_For_SLC22A6;
-				
+				firstTable[4] = result_For_SLCO1B1;
+				firstTable[5] = result_For_SLC22A8;
+				secondTable[0] = smilesString;
+				secondTable[1] = result_For_ABCC2;
+				secondTable[2] = result_For_SLC22A1;
+				secondTable[3] = result_For_SLCO1A2;
+				secondTable[4] = result_For_SLC22A2;
+				secondTable[5] = result_For_ABCC1;
 				//re-define the table here.
 				
 				table.setModel(new DefaultTableModel(
@@ -289,7 +367,22 @@ public class GUIPredictionClass extends JFrame{
 						}
 					});
 				//same for second table
-				
+				table_1.setModel(new DefaultTableModel(
+						new Object[][] {
+							{secondTable[0], secondTable[1], secondTable[2], secondTable[3], secondTable[4], secondTable[5]},
+						},
+						new String[] {
+							"DrugSmiles", "ABCC2", "SLC22A1", "SLCO1A2", "SLC22A2", "ABCC1"
+						}
+					) {
+						private static final long serialVersionUID = 1L;
+						Class[] columnTypes = new Class[] {
+							String.class, String.class, String.class, String.class, String.class, String.class
+						};
+						public Class getColumnClass(int columnIndex) {
+							return columnTypes[columnIndex];
+						}
+					});
 				
 				
 				
