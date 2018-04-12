@@ -66,6 +66,38 @@ public class GUIViewDrugs extends JFrame {
 	public boolean isCellEditable(int row, int column) {
         return false;
     }
+	
+	
+	public Object[][] queryTransporter(String queryTransporter){
+		String queryForDrugs = "select * from Drugs where transporter = '"+ queryTransporter + "';";
+		Object[][] newData = null;
+		try {
+		    statement = sqlconnection.createStatement();
+			resultForRowNum = statement.executeQuery(queryForDrugs);
+			//get length of row:
+			int SizeOf_result = 0;
+			while (resultForRowNum.next()) {
+					SizeOf_result++; 
+				}
+			newData = new Object[SizeOf_result][4];
+			ResultSet resultForData = statement.executeQuery(queryForDrugs);
+			int tempInt = 0;
+			while (resultForData.next()) {
+				  String drugName = resultForData.getString("drugName");
+				  String drugSmiles = resultForData.getString("drugsmiles");
+				  String action = resultForData.getString("action");
+				  String transporter = resultForData.getString("transporter");
+				  Object[] tempObject = {drugName,drugSmiles,action,transporter};
+				  newData[tempInt] = tempObject;
+				  tempInt++; 
+				}
+			System.out.println("finished");
+		}catch (SQLException e) {
+			GUIerrors raiseError = new GUIerrors(e.toString());
+			raiseError.main(e.toString());
+		}
+		return newData;
+	}
 
 	/**
 	 * Create the frame.
@@ -151,69 +183,56 @@ public class GUIViewDrugs extends JFrame {
 				String s = (String) comboBox.getSelectedItem();
 				switch (s) {//check for a match
                 	case "MDR1":
-                		
-                		
+                		Object[][] MDR1 = queryTransporter("MDR1");
+        				DefaultTableModel tableModelMDR1 = new DefaultTableModel(MDR1,columnName);
+        				table.setModel(tableModelMDR1);
                 		break;
                 	case "ABCG2":
-//                		getAllDrugMDR1 += " where transporter = 'ABCG2';";
-//					try {
-//						statement = sqlconnection.createStatement();
-//						resultForRowNum = statement.executeQuery(getAllDrugMDR1);
-//						int SizeOf_result = 0;
-//						while (resultForRowNum.next()) {
-//								SizeOf_result++; 
-//							}
-//						dbData = new Object[SizeOf_result][4];
-//						ResultSet resultForData = statement.executeQuery(getAllDrugMDR1);
-//						int tempInt = 0;
-//						while (resultForData.next()) {
-//							  String drugName = resultForData.getString("drugName");
-//							  String drugSmiles = resultForData.getString("drugsmiles");
-//							  String action = resultForData.getString("action");
-//							  String transporter = resultForData.getString("transporter");
-//							  Object[] tempObject = {drugName,drugSmiles,action,transporter};
-//							  dbData[tempInt] = tempObject;
-//							  tempInt++; 
-//							}
-//						
-//					} catch (SQLException e) {
-//						// TODO Auto-generated catch block
-//						System.out.println(e);
-//					}
-            			
+                		Object[][] ABCG2 = queryTransporter("ABCG2");
+        				DefaultTableModel tableModelABCG2 = new DefaultTableModel(ABCG2,columnName);
+        				table.setModel(tableModelABCG2);
                 		break;
                 	case "SLC22A6":
-                		
-                		System.out.println(s);
+                		Object[][] SLC22A6 = queryTransporter("SLC22A6");
+        				DefaultTableModel tableModelSLC22A6 = new DefaultTableModel(SLC22A6,columnName);
+        				table.setModel(tableModelSLC22A6);
                 		break;
                 	case "SLCO1B1":
-                		
-                		System.out.println(s);
+                		Object[][] SLCO1B1 = queryTransporter("SLCO1B1");
+        				DefaultTableModel tableModelSLCO1B1 = new DefaultTableModel(SLCO1B1,columnName);
+        				table.setModel(tableModelSLCO1B1);
                 		break;
                 	case "SLC22A8":
-                		
-                		System.out.println(s);
+                		Object[][] SLC22A8 = queryTransporter("SLC22A8");
+        				DefaultTableModel tableModelSLC22A8 = new DefaultTableModel(SLC22A8,columnName);
+        				table.setModel(tableModelSLC22A8);
                 		break;
                 	case "ABCC2":
-                		System.out.println(s);
+                		Object[][] ABCC2 = queryTransporter("ABCC2");
+        				DefaultTableModel tableModelABCC2 = new DefaultTableModel(ABCC2,columnName);
+        				table.setModel(tableModelABCC2);
                 		break;
                 	case "SLC22A1":
-                		
-                		System.out.println(s);
+                		Object[][] SLC22A1 = queryTransporter("SLC22A1");
+        				DefaultTableModel tableModelSLC22A1 = new DefaultTableModel(SLC22A1,columnName);
+        				table.setModel(tableModelSLC22A1);
                 		break;
                 	case "SLCO1A2":
-                		
-                		System.out.println(s);
+                		Object[][] SLCO1A2 = queryTransporter("SLCO1A2");
+        				DefaultTableModel tableModelSLCO1A2 = new DefaultTableModel(SLCO1A2,columnName);
+        				table.setModel(tableModelSLCO1A2);
                 		break;
                 	case "SLC22A2":
-                		
+                		Object[][] SLC22A2 = queryTransporter("SLC22A2");
+        				DefaultTableModel tableModelSLC22A2 = new DefaultTableModel(SLC22A2,columnName);
+        				table.setModel(tableModelSLC22A2);
                 		System.out.println(s);
                 		break;
                 	case "ABCC1":
-                		
-                		System.out.println(s);
+                		Object[][] ABCC1 = queryTransporter("ABCC1");
+        				DefaultTableModel tableModelABCC1 = new DefaultTableModel(ABCC1,columnName);
+        				table.setModel(tableModelABCC1);
                 		break;
-                		
                 	default:
                 		
                 		System.out.println(s);

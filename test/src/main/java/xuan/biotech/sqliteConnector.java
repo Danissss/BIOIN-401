@@ -20,7 +20,7 @@ public class sqliteConnector {
 		try {
 			
 			String workingDir = System.getProperty("user.dir");
-			workingDir += "\\DatabaseFolder\\DrugTransporterDB.db";
+			workingDir += "\\DatabaseFolder\\DrugPorter.db";
 			String url = "jdbc:sqlite:"+ workingDir;
 			
 			conn = DriverManager.getConnection(url);
